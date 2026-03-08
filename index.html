@@ -3,159 +3,24 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#6750A4">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="TrackMaster">
   
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" sizes="192x192" href="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_192dp.png">
+  <!-- Performance Optimizations -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="dns-prefetch" href="https://script.google.com">
+  
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <script src="api.js"></script>
   
-  <style>
-    /* Dashboard specific styles */
-    .team-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: var(--spacing-md);
-    }
-    
-    .team-member {
-      background: var(--surface-container);
-      border-radius: var(--radius-md);
-      padding: var(--spacing-lg);
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    
-    .team-member:active {
-      transform: scale(0.98);
-    }
-    
-    .member-header {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-      margin-bottom: var(--spacing-md);
-    }
-    
-    .member-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: var(--radius-full);
-      background: var(--primary);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 18px;
-    }
-    
-    .member-info h4 {
-      font-size: 16px;
-      margin-bottom: 4px;
-    }
-    
-    .member-role {
-      font-size: 12px;
-      color: var(--outline);
-    }
-    
-    .member-id {
-      font-size: 12px;
-      color: var(--primary);
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    
-    .member-contact {
-      font-size: 12px;
-      color: var(--outline);
-    }
-    
-    .activity-item {
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    
-    .activity-item:hover {
-      transform: translateX(4px);
-    }
-    
-    .activity-item.pending {
-      border-left-color: var(--warning);
-    }
-    
-    .activity-meta {
-      display: flex;
-      gap: var(--spacing-md);
-      margin-top: var(--spacing-sm);
-      font-size: 12px;
-      color: var(--outline);
-    }
-    
-    .activity-meta-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    
-    .report-preview {
-      margin-top: var(--spacing-lg);
-      max-height: 400px;
-      overflow-y: auto;
-    }
-    
-    .preview-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    .preview-table th {
-      background: var(--primary);
-      color: white;
-      padding: var(--spacing-sm);
-      font-size: 12px;
-      text-align: left;
-      position: sticky;
-      top: 0;
-    }
-    
-    .preview-table td {
-      padding: var(--spacing-sm);
-      border-bottom: 1px solid var(--outline);
-      font-size: 12px;
-    }
-    
-    .filter-bar {
-      display: flex;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-lg);
-      overflow-x: auto;
-      padding: var(--spacing-xs) 0;
-    }
-    
-    .filter-chip {
-      padding: var(--spacing-sm) var(--spacing-lg);
-      border-radius: var(--radius-full);
-      background: var(--surface-container);
-      color: var(--on-surface);
-      border: none;
-      font-size: 14px;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-    
-    .filter-chip.active {
-      background: var(--primary);
-      color: white;
-    }
-  </style>
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  
+  <title>TrackMaster</title>
 </head>
 <body>
   <div id="app">
@@ -187,14 +52,12 @@
       <!-- Main Content -->
       <div class="main-content">
         <div class="page-container">
-          <div class="page" id="currentPage">
-            <!-- Page content loaded dynamically -->
-          </div>
+          <div class="page" id="currentPage"></div>
         </div>
       </div>
       
       <!-- Floating Action Button -->
-      <button class="fab" onclick="navigateTo('newactivity')" title="New Activity">
+      <button class="fab" onclick="window.location.href='newactivity.html'" title="New Activity">
         <span class="material-icons-round">add</span>
       </button>
       
@@ -216,9 +79,9 @@
           <span class="material-icons-round nav-icon">download</span>
           <span class="nav-label">Reports</span>
         </a>
-        <a href="#" class="nav-item" onclick="navigateTo('profile')">
-          <span class="material-icons-round nav-icon">person</span>
-          <span class="nav-label">Profile</span>
+        <a href="#" class="nav-item" onclick="navigateTo('more')">
+          <span class="material-icons-round nav-icon">more_horiz</span>
+          <span class="nav-label">More</span>
         </a>
       </div>
     </div>
@@ -233,14 +96,24 @@
     <div class="toast-container" id="toastContainer"></div>
   </div>
   
+  <!-- API Script -->
+  <script src="api.js"></script>
+  
   <script>
-    // App State
+    // App State with caching
     const appState = {
       currentUser: null,
       isOnline: navigator.onLine,
       currentPage: 'home',
-      isLoading: false
+      reportType: 'weekly',
+      format: 'csv',
+      previewData: null,
+      recentReports: JSON.parse(localStorage.getItem('recentReports') || '[]'),
+      offlineActivities: JSON.parse(localStorage.getItem('offlineActivities') || '[]')
     };
+    
+    // Page Cache for faster navigation
+    const pageCache = new Map();
     
     // Check authentication
     function checkAuth() {
@@ -250,24 +123,16 @@
       if (savedUser) {
         try {
           const userData = JSON.parse(savedUser);
-          const expiryTime = userData.expiry || 0;
-          
-          if (Date.now() < expiryTime) {
+          if (Date.now() < (userData.expiry || 0)) {
             appState.currentUser = userData;
             return true;
-          } else {
-            localStorage.removeItem('trackmaster_user');
           }
-        } catch (e) {
-          console.error('Error parsing saved user:', e);
-        }
+        } catch (e) {}
       } else if (sessionUser) {
         try {
           appState.currentUser = JSON.parse(sessionUser);
           return true;
-        } catch (e) {
-          console.error('Error parsing session user:', e);
-        }
+        } catch (e) {}
       }
       
       window.location.href = 'login.html';
@@ -279,8 +144,25 @@
       if (!checkAuth()) return;
       
       setupEventListeners();
-      await loadPage('home');
-      checkInstallPrompt();
+      registerServiceWorker();
+      
+      // Show cached page immediately if available
+      const cached = pageCache.get('home');
+      if (cached) {
+        document.getElementById('currentPage').innerHTML = cached;
+      }
+      
+      // Load fresh data in background
+      setTimeout(() => loadPage('home'), 100);
+    }
+    
+    // Register Service Worker
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.log('ServiceWorker registration failed:', err);
+        });
+      }
     }
     
     // Setup event listeners
@@ -289,6 +171,7 @@
         appState.isOnline = true;
         document.getElementById('offlineIndicator').style.display = 'none';
         showToast('You are back online!', 'success');
+        syncOfflineActivities();
       });
       
       window.addEventListener('offline', () => {
@@ -297,14 +180,31 @@
         showToast('You are offline', 'warning');
       });
       
-      // Handle back button
       window.addEventListener('popstate', (e) => {
-        if (e.state && e.state.page) {
-          loadPage(e.state.page, false);
-        } else {
-          loadPage('home', false);
-        }
+        const page = e.state?.page || 'home';
+        navigateTo(page, false);
       });
+    }
+    
+    // Sync offline activities
+    async function syncOfflineActivities() {
+      if (appState.offlineActivities.length > 0) {
+        showToast('Syncing offline activities...', 'info');
+        
+        for (const activity of appState.offlineActivities) {
+          try {
+            const result = await API.saveActivity(activity);
+            if (result.success) {
+              appState.offlineActivities = appState.offlineActivities.filter(a => a !== activity);
+              localStorage.setItem('offlineActivities', JSON.stringify(appState.offlineActivities));
+            }
+          } catch (error) {
+            console.error('Sync failed:', error);
+          }
+        }
+        
+        showToast('Sync completed!', 'success');
+      }
     }
     
     // Navigation
@@ -312,81 +212,112 @@
       appState.currentPage = page;
       
       // Update active nav item
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
+      const navMap = { home: 0, myactivity: 1, myteam: 2, reports: 3, more: 4 };
+      document.querySelectorAll('.nav-item').forEach((item, index) => {
+        item.classList.toggle('active', index === navMap[page]);
       });
       
-      const navItems = document.querySelectorAll('.nav-item');
-      const pageMap = {
-        'home': 0,
-        'myactivity': 1,
-        'myteam': 2,
-        'reports': 3,
-        'profile': 4
-      };
-      
-      if (pageMap[page] !== undefined) {
-        navItems[pageMap[page]].classList.add('active');
-      }
-      
       if (addToHistory) {
-        history.pushState({ page: page }, '', `#${page}`);
+        history.pushState({ page }, '', `#${page}`);
       }
       
+      // Show cached page immediately
+      const cached = pageCache.get(page);
+      if (cached) {
+        document.getElementById('currentPage').innerHTML = cached;
+      }
+      
+      // Load fresh data
       await loadPage(page);
     }
     
     // Load page content
     async function loadPage(page) {
-      const pageContainer = document.getElementById('currentPage');
-      if (!pageContainer) return;
+      const container = document.getElementById('currentPage');
       
-      let content = '';
-      
-      switch(page) {
-        case 'home':
-          content = await loadDashboard();
-          break;
-        case 'myactivity':
-          content = await loadMyActivity();
-          break;
-        case 'myteam':
-          content = await loadMyTeam();
-          break;
-        case 'reports':
-          content = loadReports();
-          break;
-        case 'profile':
-          content = loadProfile();
-          break;
-        case 'newactivity':
-          window.location.href = 'newactivity.html';
-          return;
-        default:
-          content = await loadDashboard();
+      // Show loading only if no cache
+      if (!pageCache.has(page)) {
+        document.getElementById('loading').style.display = 'flex';
       }
       
-      pageContainer.innerHTML = content;
+      try {
+        let html = '';
+        
+        switch(page) {
+          case 'home':
+            html = await loadDashboard();
+            break;
+          case 'myactivity':
+            html = await loadMyActivity();
+            break;
+          case 'myteam':
+            html = await loadMyTeam();
+            break;
+          case 'reports':
+            html = loadReports();
+            break;
+          case 'more':
+            html = loadMore();
+            break;
+        }
+        
+        // Cache the page content
+        pageCache.set(page, html);
+        container.innerHTML = html;
+        
+        // Setup lazy loading for images
+        setupLazyLoading();
+        
+      } catch (error) {
+        console.error('Error loading page:', error);
+        if (!pageCache.has(page)) {
+          container.innerHTML = '<div class="card">Error loading content. <button onclick="retryLoad()">Retry</button></div>';
+        }
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+    
+    // Retry loading
+    function retryLoad() {
+      loadPage(appState.currentPage);
+    }
+    
+    // Setup lazy loading for images
+    function setupLazyLoading() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            if (img.dataset.src) {
+              img.src = img.dataset.src;
+              img.removeAttribute('data-src');
+            }
+            observer.unobserve(img);
+          }
+        });
+      });
+      
+      document.querySelectorAll('img[data-src]').forEach(img => observer.observe(img));
     }
     
     // Load Dashboard
     async function loadDashboard() {
       if (!appState.currentUser) return '<div class="card">Please login</div>';
       
-      document.getElementById('loading').style.display = 'flex';
-      
       try {
         const result = await API.getDashboardStats(appState.currentUser.staffId);
-        document.getElementById('loading').style.display = 'none';
         
         if (result.success) {
           const stats = result.stats;
+          const recentActivities = result.activities?.slice(0, 5) || [];
+          
           return `
             <div class="card">
               <div class="card-header">
                 <h3 class="card-title">
                   <span class="material-icons-round">dashboard</span>
-                  Welcome, ${appState.currentUser.name}
+                  Welcome, ${escapeHtml(appState.currentUser.name)}
                 </h3>
               </div>
               <div class="stats-grid">
@@ -417,7 +348,7 @@
                 </h3>
               </div>
               <div class="stats-grid">
-                ${Object.entries(stats.typeBreakdown).map(([type, count]) => `
+                ${Object.entries(stats.typeBreakdown || {}).map(([type, count]) => `
                   <div class="stat-card">
                     <div class="stat-value">${count}</div>
                     <div class="stat-label">${type}</div>
@@ -425,12 +356,30 @@
                 `).join('')}
               </div>
             </div>
+            
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <span class="material-icons-round">history</span>
+                  Recent Activities
+                </h3>
+              </div>
+              <div class="activity-list">
+                ${recentActivities.length > 0 ? recentActivities.map(a => `
+                  <div class="activity-item" onclick="editActivity('${a.rowId}')">
+                    <div class="activity-header">
+                      <span class="activity-date">${formatDate(a.date)}</span>
+                      <span class="activity-day">${a.status}</span>
+                    </div>
+                    <div class="activity-description">${escapeHtml(a.description)}</div>
+                  </div>
+                `).join('') : '<div style="padding: 20px; text-align: center;">No recent activities</div>'}
+              </div>
+            </div>
           `;
-        } else {
-          return '<div class="card">Error loading dashboard</div>';
         }
+        return '<div class="card">Error loading dashboard</div>';
       } catch (error) {
-        document.getElementById('loading').style.display = 'none';
         return '<div class="card">Error loading dashboard</div>';
       }
     }
@@ -439,24 +388,21 @@
     async function loadMyActivity() {
       if (!appState.currentUser) return '<div class="card">Please login</div>';
       
-      document.getElementById('loading').style.display = 'flex';
-      
       try {
         const result = await API.getUserActivities(appState.currentUser.staffId, 'all');
-        document.getElementById('loading').style.display = 'none';
         
         if (result.success && result.activities.length > 0) {
           // Group activities by month
           const grouped = {};
           result.activities.forEach(activity => {
             const date = new Date(activity.date);
-            const monthYear = `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
+            const monthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' });
             if (!grouped[monthYear]) grouped[monthYear] = [];
             grouped[monthYear].push(activity);
           });
           
           let html = `
-            <div class="filter-bar">
+            <div class="filter-bar" style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto;">
               <button class="filter-chip active" onclick="filterActivities('all')">All</button>
               <button class="filter-chip" onclick="filterActivities('weekly')">This Week</button>
               <button class="filter-chip" onclick="filterActivities('monthly')">This Month</button>
@@ -468,31 +414,29 @@
               <div class="card">
                 <div class="card-header">
                   <h3 class="card-title">${month}</h3>
-                  <span class="activity-day">${activities.length} activities</span>
+                  <span class="badge">${activities.length} activities</span>
                 </div>
                 <div class="activity-list">
-                  ${activities.map(activity => `
-                    <div class="activity-item ${activity.status === 'Pending Approval' ? 'pending' : ''}" onclick="editActivity('${activity.rowId}')">
+                  ${activities.map(a => `
+                    <div class="activity-item ${a.status === 'Pending Approval' ? 'pending' : ''}" onclick="editActivity('${a.rowId}')">
                       <div class="activity-header">
-                        <span class="activity-date">${activity.date}</span>
-                        <span class="activity-day" style="color: ${activity.status === 'Approved' ? 'var(--success)' : 'var(--warning)'}">
-                          ${activity.status}
+                        <span class="activity-date">${a.date}</span>
+                        <span class="activity-day" style="color: ${a.status === 'Approved' ? 'var(--success)' : 'var(--warning)'}">
+                          ${a.status}
                         </span>
                       </div>
-                      <div class="activity-description">${activity.description}</div>
+                      <div class="activity-description">${escapeHtml(a.description)}</div>
                       <div class="activity-meta">
-                        ${activity.location ? `
+                        ${a.location ? `
                           <span class="activity-meta-item">
-                            <span class="material-icons-round" style="font-size: 16px;">location_on</span>
-                            ${activity.location}
+                            <span class="material-icons-round">location_on</span>
+                            ${a.location}
                           </span>
                         ` : ''}
-                        ${activity.teamMembers.length > 0 ? `
-                          <span class="activity-meta-item">
-                            <span class="material-icons-round" style="font-size: 16px;">groups</span>
-                            ${activity.teamMembers.length} member(s)
-                          </span>
-                        ` : ''}
+                        <span class="activity-meta-item">
+                          <span class="material-icons-round">groups</span>
+                          ${a.teamMembers.length} member(s)
+                        </span>
                       </div>
                     </div>
                   `).join('')}
@@ -502,36 +446,30 @@
           });
           
           return html;
-        } else {
-          return `
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">No Activities Found</h3>
-              </div>
-              <div style="text-align: center; padding: 40px 20px; color: var(--outline);">
-                <span class="material-icons-round" style="font-size: 48px; margin-bottom: 16px;">assignment</span>
-                <p>You haven't added any activities yet.</p>
-                <button class="btn btn-primary" onclick="window.location.href='newactivity.html'" style="margin-top: 20px;">
-                  <span class="material-icons-round">add</span>
-                  Add New Activity
-                </button>
-              </div>
-            </div>
-          `;
         }
+        
+        return `
+          <div class="card">
+            <div style="text-align: center; padding: 40px 20px;">
+              <span class="material-icons-round" style="font-size: 48px; color: var(--outline);">assignment</span>
+              <h3>No Activities Found</h3>
+              <p style="color: var(--outline); margin: 20px 0;">Start by adding your first activity</p>
+              <button class="btn btn-primary" onclick="window.location.href='newactivity.html'">
+                <span class="material-icons-round">add</span>
+                Add New Activity
+              </button>
+            </div>
+          </div>
+        `;
       } catch (error) {
-        document.getElementById('loading').style.display = 'none';
         return '<div class="card">Error loading activities</div>';
       }
     }
     
     // Load My Team
     async function loadMyTeam() {
-      document.getElementById('loading').style.display = 'flex';
-      
       try {
         const result = await API.getTeamMembers();
-        document.getElementById('loading').style.display = 'none';
         
         if (result.success) {
           return `
@@ -547,30 +485,28 @@
                   <div class="team-member" onclick="viewMemberProfile('${member.staffId}')">
                     <div class="member-header">
                       <div class="member-avatar" style="background: ${getAvatarColor(member.staffId)}">
-                        ${member.name.split(' ').map(n => n[0]).join('')}
+                        ${getInitials(member.name)}
                       </div>
                       <div class="member-info">
-                        <h4>${member.name}</h4>
-                        <div class="member-role">${member.designation || 'Team Member'}</div>
+                        <h4>${escapeHtml(member.name || 'Unknown')}</h4>
+                        <div class="member-role">${escapeHtml(member.designation || 'Team Member')}</div>
                       </div>
                     </div>
-                    <div class="member-id">${member.staffId}</div>
-                    <div class="member-contact">${member.contactNo || 'No contact'}</div>
+                    <div class="member-id">${escapeHtml(member.staffId || 'N/A')}</div>
+                    <div class="member-contact">${escapeHtml(member.contactNo || 'No contact')}</div>
                   </div>
                 `).join('')}
               </div>
             </div>
           `;
-        } else {
-          return '<div class="card">Error loading team</div>';
         }
+        return '<div class="card">Error loading team</div>';
       } catch (error) {
-        document.getElementById('loading').style.display = 'none';
         return '<div class="card">Error loading team</div>';
       }
     }
     
-    // Load Reports
+    // Load Reports (Old style)
     function loadReports() {
       return `
         <div class="card">
@@ -581,27 +517,32 @@
             </h3>
           </div>
           
-          <div class="form-group">
-            <label class="form-label">Report Type</label>
-            <div style="display: flex; gap: var(--spacing-md);">
-              <label style="flex: 1;">
-                <input type="radio" name="reportType" value="weekly" checked> Weekly
-              </label>
-              <label style="flex: 1;">
-                <input type="radio" name="reportType" value="monthly"> Monthly
-              </label>
+          <div class="report-types">
+            <div class="report-type-card ${appState.reportType === 'weekly' ? 'selected' : ''}" onclick="selectReportType('weekly')">
+              <div class="report-icon">
+                <span class="material-icons-round">date_range</span>
+              </div>
+              <div>Weekly Report</div>
+            </div>
+            <div class="report-type-card ${appState.reportType === 'monthly' ? 'selected' : ''}" onclick="selectReportType('monthly')">
+              <div class="report-icon">
+                <span class="material-icons-round">calendar_month</span>
+              </div>
+              <div>Monthly Report</div>
             </div>
           </div>
           
           <div class="form-group">
-            <label class="form-label">Format</label>
-            <div style="display: flex; gap: var(--spacing-md);">
-              <label style="flex: 1;">
-                <input type="radio" name="format" value="csv" checked> CSV
-              </label>
-              <label style="flex: 1;">
-                <input type="radio" name="format" value="preview"> Preview
-              </label>
+            <label class="form-label">Download Format</label>
+            <div class="format-options">
+              <div class="format-option ${appState.format === 'pdf' ? 'selected' : ''}" onclick="selectFormat('pdf')">
+                <span class="material-icons-round">picture_as_pdf</span>
+                <div>PDF</div>
+              </div>
+              <div class="format-option ${appState.format === 'csv' ? 'selected' : ''}" onclick="selectFormat('csv')">
+                <span class="material-icons-round">table_chart</span>
+                <div>CSV</div>
+              </div>
             </div>
           </div>
           
@@ -611,44 +552,139 @@
           </button>
         </div>
         
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span class="material-icons-round">history</span>
+              Recent Reports
+            </h3>
+          </div>
+          <div class="activity-list">
+            ${appState.recentReports.length > 0 ? appState.recentReports.map(report => `
+              <div class="activity-item" onclick="downloadReport('${report.id}')">
+                <div class="activity-header">
+                  <span class="activity-date">${report.date}</span>
+                  <span class="activity-day">${report.type}</span>
+                </div>
+                <div class="activity-description">${report.name}</div>
+              </div>
+            `).join('') : `
+              <div style="padding: 20px; text-align: center; color: var(--outline);">
+                No reports generated yet
+              </div>
+            `}
+          </div>
+        </div>
+        
         <div id="reportPreview" style="display: none;"></div>
       `;
     }
     
-    // Load Profile
-    function loadProfile() {
-      if (!appState.currentUser) return '<div class="card">Please login</div>';
-      
-      const user = appState.currentUser;
-      
+    // Load More Tab (Old style)
+    function loadMore() {
       return `
-        <div class="card" style="text-align: center;">
-          <div class="member-avatar" style="width: 80px; height: 80px; margin: 0 auto var(--spacing-lg); font-size: 32px;">
-            ${user.name.split(' ').map(n => n[0]).join('')}
-          </div>
-          <h2 style="margin-bottom: var(--spacing-sm);">${user.name}</h2>
-          <p style="color: var(--outline); margin-bottom: var(--spacing-lg);">${user.designation || 'Team Member'}</p>
-        </div>
-        
         <div class="card">
-          <div class="info-item" style="display: flex; justify-content: space-between; padding: var(--spacing-md) 0; border-bottom: 1px solid var(--outline);">
-            <span style="color: var(--outline);">Staff ID</span>
-            <span style="font-weight: 500;">${user.staffId}</span>
+          <div class="card-header">
+            <h3 class="card-title">
+              <span class="material-icons-round">person</span>
+              Profile
+            </h3>
           </div>
-          <div class="info-item" style="display: flex; justify-content: space-between; padding: var(--spacing-md) 0; border-bottom: 1px solid var(--outline);">
-            <span style="color: var(--outline);">Email</span>
-            <span style="font-weight: 500;">${user.email || 'Not provided'}</span>
-          </div>
-          <div class="info-item" style="display: flex; justify-content: space-between; padding: var(--spacing-md) 0;">
-            <span style="color: var(--outline);">Contact</span>
-            <span style="font-weight: 500;">${user.contactNo || 'Not provided'}</span>
+          <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-md);">
+            <div class="member-avatar" style="width: 64px; height: 64px; font-size: 24px; background: var(--primary);">
+              ${getInitials(appState.currentUser?.name)}
+            </div>
+            <div>
+              <h4>${escapeHtml(appState.currentUser?.name || 'User')}</h4>
+              <div style="color: var(--outline);">${escapeHtml(appState.currentUser?.staffId || '')}</div>
+              <div style="color: var(--outline);">${escapeHtml(appState.currentUser?.designation || '')}</div>
+            </div>
           </div>
         </div>
         
-        <button class="btn btn-secondary btn-full" onclick="logout()" style="margin-top: var(--spacing-lg);">
-          <span class="material-icons-round">logout</span>
-          Logout
-        </button>
+        <div class="more-menu">
+          <div class="more-item" onclick="showSettings()">
+            <div class="more-icon">
+              <span class="material-icons-round">settings</span>
+            </div>
+            <div class="more-content">
+              <div class="more-title">Settings</div>
+              <div class="more-subtitle">App preferences and settings</div>
+            </div>
+            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
+          </div>
+          
+          <div class="more-item" onclick="showHelp()">
+            <div class="more-icon">
+              <span class="material-icons-round">help</span>
+            </div>
+            <div class="more-content">
+              <div class="more-title">Help & Support</div>
+              <div class="more-subtitle">FAQs and contact support</div>
+            </div>
+            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
+          </div>
+          
+          <div class="more-item" onclick="showAbout()">
+            <div class="more-icon">
+              <span class="material-icons-round">info</span>
+            </div>
+            <div class="more-content">
+              <div class="more-title">About</div>
+              <div class="more-subtitle">Version 1.0.0</div>
+            </div>
+            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
+          </div>
+          
+          <div class="more-item" onclick="privacyPolicy()">
+            <div class="more-icon">
+              <span class="material-icons-round">privacy_tip</span>
+            </div>
+            <div class="more-content">
+              <div class="more-title">Privacy Policy</div>
+              <div class="more-subtitle">Read our privacy policy</div>
+            </div>
+            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
+          </div>
+          
+          <div class="more-item" onclick="termsOfUse()">
+            <div class="more-icon">
+              <span class="material-icons-round">description</span>
+            </div>
+            <div class="more-content">
+              <div class="more-title">Terms of Use</div>
+              <div class="more-subtitle">Terms and conditions</div>
+            </div>
+            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
+          </div>
+        </div>
+        
+        <div class="card" style="margin-top: var(--spacing-lg);">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span class="material-icons-round">storage</span>
+              Storage
+            </h3>
+          </div>
+          <div style="padding: var(--spacing-md);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <span>Offline Activities</span>
+              <span>${appState.offlineActivities.length} pending</span>
+            </div>
+            <div style="height: 8px; background: var(--surface-container); border-radius: 4px; overflow: hidden;">
+              <div style="width: ${Math.min(100, appState.offlineActivities.length * 10)}%; height: 100%; background: var(--primary);"></div>
+            </div>
+            <button class="btn btn-secondary btn-full" style="margin-top: 15px;" onclick="clearOfflineData()">
+              <span class="material-icons-round">delete_sweep</span>
+              Clear Offline Data
+            </button>
+          </div>
+        </div>
+        
+        <div class="version-info">
+          TrackMaster v1.0.0<br>
+          © 2026 All rights reserved
+        </div>
       `;
     }
     
@@ -666,7 +702,7 @@
         document.getElementById('loading').style.display = 'none';
         
         if (result.success) {
-          // Refresh the activity list
+          pageCache.delete('myactivity');
           await loadPage('myactivity');
         }
       } catch (error) {
@@ -675,20 +711,29 @@
       }
     }
     
+    // Select report type
+    function selectReportType(type) {
+      appState.reportType = type;
+      loadPage('reports');
+    }
+    
+    // Select format
+    function selectFormat(format) {
+      appState.format = format;
+      loadPage('reports');
+    }
+    
     // Generate report
     async function generateReport() {
       if (!appState.currentUser) return;
-      
-      const reportType = document.querySelector('input[name="reportType"]:checked')?.value || 'weekly';
-      const format = document.querySelector('input[name="format"]:checked')?.value || 'csv';
       
       document.getElementById('loading').style.display = 'flex';
       
       try {
         const result = await API.generateReport(
           appState.currentUser.staffId,
-          reportType,
-          format,
+          appState.reportType,
+          appState.format,
           new Date().getMonth(),
           new Date().getFullYear()
         );
@@ -696,15 +741,27 @@
         document.getElementById('loading').style.display = 'none';
         
         if (result.success) {
-          if (format === 'csv' && result.data) {
+          if (appState.format === 'csv' && result.data) {
             // Download CSV
             const blob = new Blob([result.data], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = result.filename || `report_${reportType}_${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = result.filename || `report_${appState.reportType}_${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
             window.URL.revokeObjectURL(url);
+            
+            // Add to recent reports
+            const report = {
+              id: Date.now(),
+              name: `${appState.reportType.charAt(0).toUpperCase() + appState.reportType.slice(1)} Report`,
+              date: new Date().toLocaleDateString(),
+              type: appState.reportType
+            };
+            appState.recentReports.unshift(report);
+            if (appState.recentReports.length > 5) appState.recentReports.pop();
+            localStorage.setItem('recentReports', JSON.stringify(appState.recentReports));
+            
             showToast('Report downloaded successfully!', 'success');
           } else if (result.activities) {
             // Show preview
@@ -734,24 +791,27 @@
           <div class="card">
             <div class="card-header">
               <h3 class="card-title">Report Preview (${activities.length} activities)</h3>
+              <button class="icon-button" onclick="closePreview()">
+                <span class="material-icons-round">close</span>
+              </button>
             </div>
-            <div class="report-preview">
-              <table class="preview-table">
+            <div class="report-preview" style="max-height: 400px; overflow-y: auto;">
+              <table class="preview-table" style="width: 100%; border-collapse: collapse;">
                 <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Location</th>
-                    <th>Status</th>
+                  <tr style="background: var(--primary); color: white;">
+                    <th style="padding: 10px; text-align: left;">Date</th>
+                    <th style="padding: 10px; text-align: left;">Description</th>
+                    <th style="padding: 10px; text-align: left;">Location</th>
+                    <th style="padding: 10px; text-align: left;">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   ${activities.map(a => `
-                    <tr>
-                      <td>${a.date}</td>
-                      <td>${a.description.substring(0, 30)}${a.description.length > 30 ? '...' : ''}</td>
-                      <td>${a.location || 'N/A'}</td>
-                      <td>${a.status}</td>
+                    <tr style="border-bottom: 1px solid var(--outline);">
+                      <td style="padding: 10px;">${a.date}</td>
+                      <td style="padding: 10px;">${escapeHtml(a.description.substring(0, 30))}${a.description.length > 30 ? '...' : ''}</td>
+                      <td style="padding: 10px;">${a.location || 'N/A'}</td>
+                      <td style="padding: 10px;">${a.status}</td>
                     </tr>
                   `).join('')}
                 </tbody>
@@ -764,30 +824,47 @@
       previewDiv.style.display = 'block';
     }
     
-    // Helper function for avatar colors
+    // Close preview
+    function closePreview() {
+      document.getElementById('reportPreview').style.display = 'none';
+    }
+    
+    // Helper functions
+    function getInitials(name) {
+      if (!name) return 'U';
+      return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    }
+    
     function getAvatarColor(id) {
       const colors = ['#6750A4', '#0D904F', '#DC3545', '#FFC107', '#17A2B8'];
       const index = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
       return colors[index];
     }
     
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    
+    function escapeHtml(unsafe) {
+      if (!unsafe) return '';
+      return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+    
     // Edit activity
     function editActivity(rowId) {
-      // Store activity ID and navigate to edit page
       sessionStorage.setItem('editActivityId', rowId);
       window.location.href = 'newactivity.html?edit=' + rowId;
     }
     
     // View member profile
     function viewMemberProfile(staffId) {
-      showToast('Viewing member: ' + staffId, 'info');
-      // Implement member profile view
-    }
-    
-    // Refresh data
-    async function refreshData() {
-      showToast('Refreshing data...', 'info');
-      await loadPage(appState.currentPage);
+      showToast('Viewing profile: ' + staffId, 'info');
     }
     
     // Show notifications
@@ -795,11 +872,56 @@
       showToast('No new notifications', 'info');
     }
     
+    // Show settings
+    function showSettings() {
+      showToast('Settings coming soon', 'info');
+    }
+    
+    // Show help
+    function showHelp() {
+      showToast('Help & Support', 'info');
+    }
+    
+    // Show about
+    function showAbout() {
+      showToast('TrackMaster v1.0.0', 'info');
+    }
+    
+    // Privacy policy
+    function privacyPolicy() {
+      showToast('Privacy policy', 'info');
+    }
+    
+    // Terms of use
+    function termsOfUse() {
+      showToast('Terms of use', 'info');
+    }
+    
+    // Clear offline data
+    function clearOfflineData() {
+      if (confirm('Clear all offline data?')) {
+        appState.offlineActivities = [];
+        localStorage.removeItem('offlineActivities');
+        loadPage('more');
+        showToast('Offline data cleared', 'success');
+      }
+    }
+    
+    // Refresh data
+    function refreshData() {
+      pageCache.clear();
+      API.cache.clear();
+      loadPage(appState.currentPage);
+      showToast('Data refreshed', 'success');
+    }
+    
     // Logout
     function logout() {
       if (confirm('Are you sure you want to logout?')) {
         localStorage.removeItem('trackmaster_user');
         sessionStorage.removeItem('trackmaster_session');
+        pageCache.clear();
+        API.cache.clear();
         window.location.href = 'login.html';
       }
     }
@@ -809,15 +931,14 @@
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
       toast.textContent = message;
+      toast.setAttribute('role', 'alert');
       
       const container = document.getElementById('toastContainer');
       container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-    
-    // Check install prompt
-    function checkInstallPrompt() {
-      // PWA install prompt logic
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
     }
     
     // Initialize on load
