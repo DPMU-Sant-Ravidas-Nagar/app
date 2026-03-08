@@ -21,6 +21,43 @@
   <link rel="manifest" href="manifest.json">
   
   <title>TrackMaster</title>
+  
+  <style>
+    /* Additional styles for tabs */
+    .nav-item {
+      cursor: pointer;
+    }
+    .nav-item.active {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding: 5px 0;
+    }
+    .filter-chip {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--surface-container);
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .filter-chip.active {
+      background: var(--primary);
+      color: white;
+    }
+    .badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+  </style>
 </head>
 <body>
   <div id="app">
@@ -52,7 +89,20 @@
       <!-- Main Content -->
       <div class="main-content">
         <div class="page-container">
-          <div class="page" id="currentPage"></div>
+          <div class="page" id="currentPage">
+            <!-- Loading Skeleton -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Loading...</h3>
+              </div>
+              <div class="stats-grid">
+                <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
+                <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
+                <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
+                <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -61,25 +111,25 @@
         <span class="material-icons-round">add</span>
       </button>
       
-      <!-- Bottom Navigation -->
+      <!-- Bottom Navigation - IMPORTANT: These onclick handlers must work -->
       <div class="bottom-nav">
-        <a href="#" class="nav-item" onclick="navigateTo('home')">
+        <a href="#" class="nav-item" onclick="event.preventDefault(); navigateTo('home'); return false;">
           <span class="material-icons-round nav-icon">home</span>
           <span class="nav-label">Home</span>
         </a>
-        <a href="#" class="nav-item" onclick="navigateTo('myactivity')">
+        <a href="#" class="nav-item" onclick="event.preventDefault(); navigateTo('myactivity'); return false;">
           <span class="material-icons-round nav-icon">list_alt</span>
           <span class="nav-label">Activity</span>
         </a>
-        <a href="#" class="nav-item" onclick="navigateTo('myteam')">
+        <a href="#" class="nav-item" onclick="event.preventDefault(); navigateTo('myteam'); return false;">
           <span class="material-icons-round nav-icon">groups</span>
           <span class="nav-label">Team</span>
         </a>
-        <a href="#" class="nav-item" onclick="navigateTo('reports')">
+        <a href="#" class="nav-item" onclick="event.preventDefault(); navigateTo('reports'); return false;">
           <span class="material-icons-round nav-icon">download</span>
           <span class="nav-label">Reports</span>
         </a>
-        <a href="#" class="nav-item" onclick="navigateTo('more')">
+        <a href="#" class="nav-item" onclick="event.preventDefault(); navigateTo('more'); return false;">
           <span class="material-icons-round nav-icon">more_horiz</span>
           <span class="nav-label">More</span>
         </a>
@@ -100,19 +150,18 @@
   <script src="api.js"></script>
   
   <script>
-    // App State with caching
+    // App State
     const appState = {
       currentUser: null,
       isOnline: navigator.onLine,
       currentPage: 'home',
       reportType: 'weekly',
       format: 'csv',
-      previewData: null,
       recentReports: JSON.parse(localStorage.getItem('recentReports') || '[]'),
       offlineActivities: JSON.parse(localStorage.getItem('offlineActivities') || '[]')
     };
     
-    // Page Cache for faster navigation
+    // Page Cache
     const pageCache = new Map();
     
     // Check authentication
@@ -146,14 +195,15 @@
       setupEventListeners();
       registerServiceWorker();
       
-      // Show cached page immediately if available
-      const cached = pageCache.get('home');
-      if (cached) {
-        document.getElementById('currentPage').innerHTML = cached;
-      }
+      // Check URL hash for direct navigation
+      const hash = window.location.hash.substring(1);
+      const initialPage = hash || 'home';
       
-      // Load fresh data in background
-      setTimeout(() => loadPage('home'), 100);
+      // Set active nav
+      updateActiveNav(initialPage);
+      
+      // Load initial page
+      await navigateTo(initialPage, false);
     }
     
     // Register Service Worker
@@ -186,6 +236,18 @@
       });
     }
     
+    // Update active navigation item
+    function updateActiveNav(page) {
+      const navMap = { home: 0, myactivity: 1, myteam: 2, reports: 3, more: 4 };
+      document.querySelectorAll('.nav-item').forEach((item, index) => {
+        if (index === navMap[page]) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
+    
     // Sync offline activities
     async function syncOfflineActivities() {
       if (appState.offlineActivities.length > 0) {
@@ -207,38 +269,56 @@
       }
     }
     
-    // Navigation
+    // Navigation function - THIS IS THE KEY FUNCTION
     async function navigateTo(page, addToHistory = true) {
+      console.log('Navigating to:', page);
+      
+      // Update current page
       appState.currentPage = page;
       
-      // Update active nav item
-      const navMap = { home: 0, myactivity: 1, myteam: 2, reports: 3, more: 4 };
-      document.querySelectorAll('.nav-item').forEach((item, index) => {
-        item.classList.toggle('active', index === navMap[page]);
-      });
+      // Update active nav
+      updateActiveNav(page);
       
+      // Add to browser history
       if (addToHistory) {
-        history.pushState({ page }, '', `#${page}`);
+        history.pushState({ page }, '', '#' + page);
       }
       
-      // Show cached page immediately
+      // Show cached page immediately if available
+      const container = document.getElementById('currentPage');
       const cached = pageCache.get(page);
+      
       if (cached) {
-        document.getElementById('currentPage').innerHTML = cached;
+        container.innerHTML = cached;
+      } else {
+        // Show loading skeleton
+        container.innerHTML = getLoadingSkeleton();
       }
       
-      // Load fresh data
-      await loadPage(page);
+      // Load fresh content
+      await loadPageContent(page);
+    }
+    
+    // Get loading skeleton
+    function getLoadingSkeleton() {
+      return `
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Loading...</h3>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
+            <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
+            <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
+            <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
+          </div>
+        </div>
+      `;
     }
     
     // Load page content
-    async function loadPage(page) {
+    async function loadPageContent(page) {
       const container = document.getElementById('currentPage');
-      
-      // Show loading only if no cache
-      if (!pageCache.has(page)) {
-        document.getElementById('loading').style.display = 'flex';
-      }
       
       try {
         let html = '';
@@ -259,46 +339,30 @@
           case 'more':
             html = loadMore();
             break;
+          default:
+            html = await loadDashboard();
         }
         
-        // Cache the page content
+        // Cache the page
         pageCache.set(page, html);
         container.innerHTML = html;
         
-        // Setup lazy loading for images
-        setupLazyLoading();
-        
       } catch (error) {
         console.error('Error loading page:', error);
-        if (!pageCache.has(page)) {
-          container.innerHTML = '<div class="card">Error loading content. <button onclick="retryLoad()">Retry</button></div>';
-        }
-      } finally {
-        document.getElementById('loading').style.display = 'none';
+        container.innerHTML = `
+          <div class="card">
+            <div style="text-align: center; padding: 40px;">
+              <span class="material-icons-round" style="font-size: 48px; color: var(--error);">error</span>
+              <h3>Error Loading Page</h3>
+              <p style="color: var(--outline); margin: 20px 0;">${error.message}</p>
+              <button class="btn btn-primary" onclick="navigateTo('${appState.currentPage}')">
+                <span class="material-icons-round">refresh</span>
+                Retry
+              </button>
+            </div>
+          </div>
+        `;
       }
-    }
-    
-    // Retry loading
-    function retryLoad() {
-      loadPage(appState.currentPage);
-    }
-    
-    // Setup lazy loading for images
-    function setupLazyLoading() {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const img = entry.target;
-            if (img.dataset.src) {
-              img.src = img.dataset.src;
-              img.removeAttribute('data-src');
-            }
-            observer.unobserve(img);
-          }
-        });
-      });
-      
-      document.querySelectorAll('img[data-src]').forEach(img => observer.observe(img));
     }
     
     // Load Dashboard
@@ -310,7 +374,6 @@
         
         if (result.success) {
           const stats = result.stats;
-          const recentActivities = result.activities?.slice(0, 5) || [];
           
           return `
             <div class="card">
@@ -322,19 +385,19 @@
               </div>
               <div class="stats-grid">
                 <div class="stat-card">
-                  <div class="stat-value">${stats.weekly}</div>
+                  <div class="stat-value">${stats.weekly || 0}</div>
                   <div class="stat-label">This Week</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">${stats.monthly}</div>
+                  <div class="stat-value">${stats.monthly || 0}</div>
                   <div class="stat-label">This Month</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">${stats.total}</div>
+                  <div class="stat-value">${stats.total || 0}</div>
                   <div class="stat-label">Total</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value">${stats.pending}</div>
+                  <div class="stat-value">${stats.pending || 0}</div>
                   <div class="stat-label">Pending</div>
                 </div>
               </div>
@@ -353,33 +416,14 @@
                     <div class="stat-value">${count}</div>
                     <div class="stat-label">${type}</div>
                   </div>
-                `).join('')}
-              </div>
-            </div>
-            
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">
-                  <span class="material-icons-round">history</span>
-                  Recent Activities
-                </h3>
-              </div>
-              <div class="activity-list">
-                ${recentActivities.length > 0 ? recentActivities.map(a => `
-                  <div class="activity-item" onclick="editActivity('${a.rowId}')">
-                    <div class="activity-header">
-                      <span class="activity-date">${formatDate(a.date)}</span>
-                      <span class="activity-day">${a.status}</span>
-                    </div>
-                    <div class="activity-description">${escapeHtml(a.description)}</div>
-                  </div>
-                `).join('') : '<div style="padding: 20px; text-align: center;">No recent activities</div>'}
+                `).join('') || '<div class="stat-card"><div class="stat-value">0</div><div class="stat-label">No Data</div></div>'}
               </div>
             </div>
           `;
         }
         return '<div class="card">Error loading dashboard</div>';
       } catch (error) {
+        console.error('Dashboard error:', error);
         return '<div class="card">Error loading dashboard</div>';
       }
     }
@@ -402,7 +446,7 @@
           });
           
           let html = `
-            <div class="filter-bar" style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto;">
+            <div class="filter-bar">
               <button class="filter-chip active" onclick="filterActivities('all')">All</button>
               <button class="filter-chip" onclick="filterActivities('weekly')">This Week</button>
               <button class="filter-chip" onclick="filterActivities('monthly')">This Month</button>
@@ -462,6 +506,7 @@
           </div>
         `;
       } catch (error) {
+        console.error('Activity error:', error);
         return '<div class="card">Error loading activities</div>';
       }
     }
@@ -502,11 +547,12 @@
         }
         return '<div class="card">Error loading team</div>';
       } catch (error) {
+        console.error('Team error:', error);
         return '<div class="card">Error loading team</div>';
       }
     }
     
-    // Load Reports (Old style)
+    // Load Reports
     function loadReports() {
       return `
         <div class="card">
@@ -580,7 +626,7 @@
       `;
     }
     
-    // Load More Tab (Old style)
+    // Load More Tab
     function loadMore() {
       return `
         <div class="card">
@@ -635,28 +681,6 @@
             </div>
             <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
           </div>
-          
-          <div class="more-item" onclick="privacyPolicy()">
-            <div class="more-icon">
-              <span class="material-icons-round">privacy_tip</span>
-            </div>
-            <div class="more-content">
-              <div class="more-title">Privacy Policy</div>
-              <div class="more-subtitle">Read our privacy policy</div>
-            </div>
-            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
-          </div>
-          
-          <div class="more-item" onclick="termsOfUse()">
-            <div class="more-icon">
-              <span class="material-icons-round">description</span>
-            </div>
-            <div class="more-content">
-              <div class="more-title">Terms of Use</div>
-              <div class="more-subtitle">Terms and conditions</div>
-            </div>
-            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
-          </div>
         </div>
         
         <div class="card" style="margin-top: var(--spacing-lg);">
@@ -670,9 +694,6 @@
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
               <span>Offline Activities</span>
               <span>${appState.offlineActivities.length} pending</span>
-            </div>
-            <div style="height: 8px; background: var(--surface-container); border-radius: 4px; overflow: hidden;">
-              <div style="width: ${Math.min(100, appState.offlineActivities.length * 10)}%; height: 100%; background: var(--primary);"></div>
             </div>
             <button class="btn btn-secondary btn-full" style="margin-top: 15px;" onclick="clearOfflineData()">
               <span class="material-icons-round">delete_sweep</span>
@@ -703,7 +724,7 @@
         
         if (result.success) {
           pageCache.delete('myactivity');
-          await loadPage('myactivity');
+          await loadPageContent('myactivity');
         }
       } catch (error) {
         document.getElementById('loading').style.display = 'none';
@@ -714,20 +735,20 @@
     // Select report type
     function selectReportType(type) {
       appState.reportType = type;
-      loadPage('reports');
+      loadPageContent('reports');
     }
     
     // Select format
     function selectFormat(format) {
       appState.format = format;
-      loadPage('reports');
+      loadPageContent('reports');
     }
     
     // Generate report
     async function generateReport() {
       if (!appState.currentUser) return;
       
-      document.getElementById('loading').style.display = 'flex';
+      showToast('Generating report...', 'info');
       
       try {
         const result = await API.generateReport(
@@ -737,8 +758,6 @@
           new Date().getMonth(),
           new Date().getFullYear()
         );
-        
-        document.getElementById('loading').style.display = 'none';
         
         if (result.success) {
           if (appState.format === 'csv' && result.data) {
@@ -763,70 +782,15 @@
             localStorage.setItem('recentReports', JSON.stringify(appState.recentReports));
             
             showToast('Report downloaded successfully!', 'success');
-          } else if (result.activities) {
-            // Show preview
-            showReportPreview(result.activities);
+          } else {
+            showToast('Report generated!', 'success');
           }
         } else {
           showToast(result.message || 'Error generating report', 'error');
         }
       } catch (error) {
-        document.getElementById('loading').style.display = 'none';
         showToast('Error generating report', 'error');
       }
-    }
-    
-    // Show report preview
-    function showReportPreview(activities) {
-      const previewDiv = document.getElementById('reportPreview');
-      
-      if (activities.length === 0) {
-        previewDiv.innerHTML = `
-          <div class="card">
-            <p style="text-align: center; color: var(--outline);">No activities found for this period</p>
-          </div>
-        `;
-      } else {
-        previewDiv.innerHTML = `
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Report Preview (${activities.length} activities)</h3>
-              <button class="icon-button" onclick="closePreview()">
-                <span class="material-icons-round">close</span>
-              </button>
-            </div>
-            <div class="report-preview" style="max-height: 400px; overflow-y: auto;">
-              <table class="preview-table" style="width: 100%; border-collapse: collapse;">
-                <thead>
-                  <tr style="background: var(--primary); color: white;">
-                    <th style="padding: 10px; text-align: left;">Date</th>
-                    <th style="padding: 10px; text-align: left;">Description</th>
-                    <th style="padding: 10px; text-align: left;">Location</th>
-                    <th style="padding: 10px; text-align: left;">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${activities.map(a => `
-                    <tr style="border-bottom: 1px solid var(--outline);">
-                      <td style="padding: 10px;">${a.date}</td>
-                      <td style="padding: 10px;">${escapeHtml(a.description.substring(0, 30))}${a.description.length > 30 ? '...' : ''}</td>
-                      <td style="padding: 10px;">${a.location || 'N/A'}</td>
-                      <td style="padding: 10px;">${a.status}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        `;
-      }
-      
-      previewDiv.style.display = 'block';
-    }
-    
-    // Close preview
-    function closePreview() {
-      document.getElementById('reportPreview').style.display = 'none';
     }
     
     // Helper functions
@@ -839,11 +803,6 @@
       const colors = ['#6750A4', '#0D904F', '#DC3545', '#FFC107', '#17A2B8'];
       const index = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
       return colors[index];
-    }
-    
-    function formatDate(dateStr) {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
     
     function escapeHtml(unsafe) {
@@ -872,29 +831,19 @@
       showToast('No new notifications', 'info');
     }
     
-    // Show settings
+    // Settings
     function showSettings() {
       showToast('Settings coming soon', 'info');
     }
     
-    // Show help
+    // Help
     function showHelp() {
       showToast('Help & Support', 'info');
     }
     
-    // Show about
+    // About
     function showAbout() {
       showToast('TrackMaster v1.0.0', 'info');
-    }
-    
-    // Privacy policy
-    function privacyPolicy() {
-      showToast('Privacy policy', 'info');
-    }
-    
-    // Terms of use
-    function termsOfUse() {
-      showToast('Terms of use', 'info');
     }
     
     // Clear offline data
@@ -902,7 +851,7 @@
       if (confirm('Clear all offline data?')) {
         appState.offlineActivities = [];
         localStorage.removeItem('offlineActivities');
-        loadPage('more');
+        loadPageContent('more');
         showToast('Offline data cleared', 'success');
       }
     }
@@ -911,7 +860,7 @@
     function refreshData() {
       pageCache.clear();
       API.cache.clear();
-      loadPage(appState.currentPage);
+      loadPageContent(appState.currentPage);
       showToast('Data refreshed', 'success');
     }
     
@@ -931,7 +880,6 @@
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
       toast.textContent = message;
-      toast.setAttribute('role', 'alert');
       
       const container = document.getElementById('toastContainer');
       container.appendChild(toast);
