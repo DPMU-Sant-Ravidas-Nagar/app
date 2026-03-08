@@ -1,32 +1,63 @@
-// api.js - Google Sheets API wrapper for GitHub Pages
+// api.js - Google Sheets API wrapper using JSONP (bypasses CORS)
 const API = {
   // Replace with your Google Apps Script deployment URL
   baseUrl: 'https://script.google.com/macros/s/AKfycby9mZGt2G9CI9HZqel8YTmExiR2HWqDb2iEk7McgYYp5Iz2eWXkrcZFhNAPdu9HQtHE/exec',
   
-  // Generic request function
+  // Generate unique callback name
+  generateCallback() {
+    return 'jsonp_callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  },
+  
+  // JSONP request function
+  jsonp(url, callbackName) {
+    return new Promise((resolve, reject) => {
+      // Create script element
+      const script = document.createElement('script');
+      script.src = url + '&callback=' + callbackName;
+      
+      // Define callback function globally
+      window[callbackName] = (data) => {
+        // Clean up
+        delete window[callbackName];
+        document.body.removeChild(script);
+        
+        // Resolve with data
+        resolve(data);
+      };
+      
+      // Handle errors
+      script.onerror = (error) => {
+        delete window[callbackName];
+        document.body.removeChild(script);
+        reject(new Error('JSONP request failed'));
+      };
+      
+      // Add script to document
+      document.body.appendChild(script);
+    });
+  },
+  
+  // Generic request function using JSONP
   async request(action, params = {}) {
-    const url = new URL(this.baseUrl);
-    url.searchParams.append('action', action);
+    const callbackName = this.generateCallback();
+    
+    // Build URL
+    let url = this.baseUrl + '?action=' + encodeURIComponent(action);
     
     // Add all params to URL
     Object.keys(params).forEach(key => {
       if (typeof params[key] === 'object') {
-        url.searchParams.append(key, JSON.stringify(params[key]));
+        url += '&' + key + '=' + encodeURIComponent(JSON.stringify(params[key]));
       } else {
-        url.searchParams.append(key, params[key]);
+        url += '&' + key + '=' + encodeURIComponent(params[key]);
       }
     });
     
+    console.log('Request URL:', url);
+    
     try {
-      const response = await fetch(url.toString(), {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      
-      const data = await response.json();
+      const data = await this.jsonp(url, callbackName);
+      console.log('Response:', data);
       return data;
     } catch (error) {
       console.error('API Error:', error);
