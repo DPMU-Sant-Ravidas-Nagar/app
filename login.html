@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6750A4">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    /* Login page specific styles */
+    .login-container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-lg);
+    }
+    
+    .login-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-3xl);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+      margin: var(--spacing-xl) 0;
+    }
+    
+    .app-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-lg);
+      background: var(--primary);
+      color: var(--on-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--spacing-xl);
+      font-size: 32px;
+    }
+    
+    .app-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .app-subtitle {
+      color: var(--outline);
+      margin-bottom: var(--spacing-2xl);
+      font-size: 14px;
+    }
+    
+    .form-group {
+      margin-bottom: var(--spacing-xl);
+      text-align: left;
+    }
+    
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: var(--spacing-sm);
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: var(--spacing-lg);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius-sm);
+      font-size: 16px;
+      font-family: inherit;
+      background: white;
+      transition: border-color 0.2s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(103, 80, 164, 0.1);
+    }
+    
+    .password-container {
+      position: relative;
+    }
+    
+    .toggle-password {
+      position: absolute;
+      right: var(--spacing-lg);
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: var(--outline);
+      cursor: pointer;
+      padding: var(--spacing-xs);
+    }
+    
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin: var(--spacing-lg) 0;
+      font-size: 14px;
+    }
+    
+    .login-button {
+      width: 100%;
+      padding: var(--spacing-lg);
+      background: var(--primary);
+      color: var(--on-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: var(--spacing-lg) 0;
+      transition: background-color 0.2s;
+    }
+    
+    .login-button:active {
+      background: color-mix(in srgb, var(--primary) 90%, black);
+      transform: scale(0.98);
+    }
+    
+    .forgot-password {
+      text-align: center;
+      margin: var(--spacing-lg) 0;
+    }
+    
+    .forgot-password a {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    
+    .forgot-password a:hover {
+      text-decoration: underline;
+    }
+    
+    .error-message {
+      color: var(--error);
+      margin: var(--spacing-md) 0;
+      font-size: 14px;
+      display: none;
+    }
+    
+    /* Biometric Login */
+    .biometric-login {
+      margin-top: var(--spacing-2xl);
+      padding-top: var(--spacing-xl);
+      border-top: 1px solid var(--outline);
+    }
+    
+    .biometric-button {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-full);
+      border: 2px solid var(--primary);
+      background: transparent;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--spacing-md);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .biometric-button:active {
+      background: var(--primary);
+      color: var(--on-primary);
+      transform: scale(0.95);
+    }
+    
+    .biometric-label {
+      color: var(--outline);
+      font-size: 12px;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      .login-card {
+        background: #2D2B30;
+      }
+      
+      .form-input {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: var(--on-surface);
+      }
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .shake {
+      animation: shake 0.5s;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="app-logo">
+        <span class="material-icons-round">track_changes</span>
+      </div>
+      
+      <h1 class="app-title">TrackMaster</h1>
+      <p class="app-subtitle">Timesheet Management System</p>
+      
+      <form id="loginForm" onsubmit="return false;">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-input" id="username" placeholder="Enter your username" required autocomplete="username">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="password-container">
+            <input type="password" class="form-input" id="password" placeholder="Enter your password" required autocomplete="current-password">
+            <button type="button" class="toggle-password" onclick="togglePassword()">
+              <span class="material-icons-round" id="toggleIcon">visibility_off</span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="remember-me">
+          <input type="checkbox" id="rememberMe">
+          <label for="rememberMe">Remember me</label>
+        </div>
+        
+        <div class="error-message" id="errorMessage"></div>
+        
+        <button class="login-button" onclick="login()">
+          Login
+        </button>
+        
+        <div class="forgot-password">
+          <a href="#" onclick="forgotPassword()">Forgot password?</a>
+        </div>
+        
+        <!-- Biometric Login (if available) -->
+        <div class="biometric-login" id="biometricLogin" style="display: none;">
+          <button type="button" class="biometric-button" onclick="biometricLogin()">
+            <span class="material-icons-round">fingerprint</span>
+          </button>
+          <div class="biometric-label">Use biometric login</div>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loading">
+    <div class="spinner"></div>
+    <div>Logging in...</div>
+  </div>
+  
+  <script>
+    // App State
+    const appState = {
+      currentUser: null,
+      isOnline: navigator.onLine,
+      deferredPrompt: null
+    };
+    
+    // Check for saved credentials
+    function checkSavedCredentials() {
+      const savedUser = localStorage.getItem('trackmaster_user');
+      
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          const expiryTime = userData.expiry || 0;
+          
+          // Check if token is still valid (7 days)
+          if (Date.now() < expiryTime) {
+            appState.currentUser = userData;
+            redirectToHome();
+            return true;
+          } else {
+            // Token expired, clear storage
+            localStorage.removeItem('trackmaster_user');
+            localStorage.removeItem('savedUsername');
+            localStorage.removeItem('savedPassword');
+          }
+        } catch (e) {
+          console.error('Error parsing saved user:', e);
+          localStorage.removeItem('trackmaster_user');
+        }
+      }
+      
+      // Auto-fill saved credentials
+      const savedUsername = localStorage.getItem('savedUsername');
+      const savedPassword = localStorage.getItem('savedPassword');
+      
+      if (savedUsername && savedPassword) {
+        document.getElementById('username').value = savedUsername;
+        document.getElementById('password').value = savedPassword;
+        document.getElementById('rememberMe').checked = true;
+      }
+      
+      return false;
+    }
+    
+    // Check for biometric authentication
+    function checkBiometricSupport() {
+      if (window.PublicKeyCredential && 
+          (localStorage.getItem('savedUsername') || localStorage.getItem('trackmaster_user'))) {
+        document.getElementById('biometricLogin').style.display = 'block';
+      }
+    }
+    
+    // Toggle password visibility
+    function togglePassword() {
+      const passwordInput = document.getElementById('password');
+      const toggleIcon = document.getElementById('toggleIcon');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.textContent = 'visibility';
+      } else {
+        passwordInput.type = 'password';
+        toggleIcon.textContent = 'visibility_off';
+      }
+    }
+    
+    // Login function
+    async function login() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+      const errorElement = document.getElementById('errorMessage');
+      
+      // Validate
+      if (!username || !password) {
+        showError('Please enter both username and password');
+        return;
+      }
+      
+      // Show loading
+      document.getElementById('loading').style.display = 'flex';
+      errorElement.style.display = 'none';
+      
+      try {
+        // Simulate API call (replace with actual Google Apps Script)
+        // const result = await google.script.run
+        //   .withFailureHandler(handleLoginError)
+        //   .handleLogin({
+        //     username: username,
+        //     password: password
+        //   });
+        
+        // For demo purposes
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        if (username === 'demo' && password === 'password') {
+          const userData = {
+            name: 'Demo User',
+            email: 'demo@example.com',
+            role: 'User',
+            employeeId: 'EMP001'
+          };
+          
+          // Save credentials if remember me is checked
+          if (rememberMe) {
+            localStorage.setItem('savedUsername', username);
+            localStorage.setItem('savedPassword', password);
+            
+            // Save user session with 7-day expiry
+            const userWithExpiry = {
+              ...userData,
+              expiry: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+            };
+            localStorage.setItem('trackmaster_user', JSON.stringify(userWithExpiry));
+          } else {
+            localStorage.removeItem('savedUsername');
+            localStorage.removeItem('savedPassword');
+            sessionStorage.setItem('trackmaster_session', JSON.stringify(userData));
+          }
+          
+          appState.currentUser = userData;
+          redirectToHome();
+        } else {
+          handleLoginError('Invalid username or password');
+        }
+      } catch (error) {
+        handleLoginError(error);
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+    
+    // Redirect to home
+    function redirectToHome() {
+      window.location.href = 'index.html';
+    }
+    
+    // Biometric login
+    async function biometricLogin() {
+      if (!window.PublicKeyCredential) {
+        showError('Biometric authentication not supported');
+        return;
+      }
+      
+      try {
+        // Try to get saved credentials
+        const savedUser = localStorage.getItem('trackmaster_user');
+        
+        if (savedUser) {
+          // In a real app, this would use WebAuthn API
+          showToast('Authenticating with biometrics...', 'info');
+          
+          // Simulate biometric auth
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          appState.currentUser = JSON.parse(savedUser);
+          redirectToHome();
+        } else {
+          showError('No saved credentials found');
+        }
+      } catch (error) {
+        console.error('Biometric login error:', error);
+        showError('Biometric authentication failed');
+      }
+    }
+    
+    // Error handling
+    function handleLoginError(error) {
+      console.error('Login error:', error);
+      
+      let errorMessage = 'Login failed. ';
+      
+      if (typeof error === 'string') {
+        errorMessage += error;
+      } else if (error && error.message) {
+        errorMessage += error.message;
+      } else {
+        errorMessage += 'Please try again.';
+      }
+      
+      showError(errorMessage);
+    }
+    
+    function showError(message) {
+      const errorElement = document.getElementById('errorMessage');
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+      errorElement.classList.add('shake');
+      
+      setTimeout(() => {
+        errorElement.classList.remove('shake');
+      }, 500);
+    }
+    
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      
+      const container = document.querySelector('.toast-container');
+      if (container) {
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+    }
+    
+    // Forgot password
+    function forgotPassword() {
+      const username = document.getElementById('username').value.trim();
+      
+      if (!username) {
+        showError('Please enter your username first');
+        return;
+      }
+      
+      alert(`Password reset instructions would be sent to the email associated with "${username}".\n\nFor now, please contact your administrator.`);
+    }
+    
+    // Enter key to submit
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        login();
+      }
+    });
+    
+    // Initialize on load
+    window.onload = function() {
+      // Check if already logged in
+      if (!checkSavedCredentials()) {
+        checkBiometricSupport();
+        document.getElementById('username').focus();
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6750A4">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    /* New Activity specific styles */
+    .container {
+      height: calc(100vh - 64px - var(--safe-top));
+      overflow-y: auto;
+      padding: var(--spacing-lg);
+      padding-bottom: calc(var(--spacing-lg) + var(--safe-bottom));
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .image-upload-section {
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .image-upload-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-md);
+    }
+    
+    .image-upload-item {
+      aspect-ratio: 1;
+      border: 2px dashed var(--outline);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      background: var(--surface-container);
+    }
+    
+    .image-upload-item.add {
+      color: var(--outline);
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+    
+    .image-upload-item.add:active {
+      background: var(--surface);
+    }
+    
+    .image-preview {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .image-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-full);
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .camera-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: black;
+      z-index: 1000;
+      display: none;
+    }
+    
+    .camera-preview {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .camera-controls {
+      position: absolute;
+      bottom: calc(var(--safe-bottom) + var(--spacing-xl));
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: var(--spacing-xl);
+    }
+    
+    .camera-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-full);
+      border: 4px solid white;
+      background: transparent;
+      cursor: pointer;
+    }
+    
+    .camera-btn.capture {
+      background: white;
+    }
+    
+    .camera-btn.close {
+      position: absolute;
+      top: calc(var(--safe-top) + var(--spacing-lg));
+      right: var(--spacing-lg);
+      width: 48px;
+      height: 48px;
+      border: none;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .location-section {
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .location-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-md);
+      padding: var(--spacing-md);
+      background: var(--surface-container);
+      border-radius: var(--radius-sm);
+    }
+    
+    .location-text {
+      flex: 1;
+      font-size: 14px;
+      color: var(--outline);
+    }
+    
+    .counter-section {
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .counter-controls {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      margin-top: var(--spacing-md);
+    }
+    
+    .counter-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-full);
+      border: 2px solid var(--primary);
+      background: transparent;
+      color: var(--primary);
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .counter-value {
+      font-size: 24px;
+      font-weight: 600;
+      min-width: 60px;
+      text-align: center;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-xl);
+    }
+  </style>
+</head>
+<body>
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="app-title">New Activity</div>
+    <button class="icon-button" onclick="goBack()">
+      <span class="material-icons-round">close</span>
+    </button>
+  </div>
+  
+  <!-- Main Form -->
+  <div class="container">
+    <div class="form-card card">
+      <div class="form-group">
+        <label class="form-label required">Date of Activity</label>
+        <input type="date" class="form-input" id="activityDate" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label required">Activity Type</label>
+        <select class="form-input" id="activityType" required>
+          <option value="">Select activity type</option>
+          <option value="FHTC Feeding">FHTC Feeding</option>
+          <option value="Verification">Verification</option>
+          <option value="Meeting">Meeting</option>
+          <option value="Field Work">Field Work</option>
+          <option value="Reporting">Reporting</option>
+          <option value="Training">Training</option>
+          <option value="Holiday">Holiday</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Block Name</label>
+        <input type="text" class="form-input" id="blockName" placeholder="Enter block name">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label required">Description of Activity</label>
+        <textarea class="form-input" id="description" placeholder="Describe your activity..." required></textarea>
+      </div>
+      
+      <!-- FHTC Counter -->
+      <div class="counter-section" id="fhtcSection" style="display: none;">
+        <label class="form-label">FHTC Feeding Count</label>
+        <div class="counter-controls">
+          <button class="counter-btn" onclick="updateCount(-1)">-</button>
+          <span class="counter-value" id="countValue">0</span>
+          <button class="counter-btn" onclick="updateCount(1)">+</button>
+        </div>
+      </div>
+      
+      <!-- Location -->
+      <div class="location-section">
+        <label class="form-label">Location</label>
+        <button class="btn btn-secondary" onclick="getLocation()" type="button" style="width: 100%; margin-top: var(--spacing-md);">
+          <span class="material-icons-round">location_on</span>
+          Get Current Location
+        </button>
+        <div class="location-info" id="locationInfo" style="display: none;">
+          <span class="material-icons-round" style="color: var(--primary);">location_on</span>
+          <div class="location-text" id="locationText"></div>
+          <button class="icon-button" onclick="clearLocation()">
+            <span class="material-icons-round">close</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Images -->
+      <div class="image-upload-section">
+        <label class="form-label">Activity Images</label>
+        <div class="image-upload-grid" id="imageGrid">
+          <div class="image-upload-item add" onclick="openImageSource()">
+            <span class="material-icons-round">add_photo_alternate</span>
+            <span style="font-size: 12px;">Add Photo</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Activity By</label>
+        <input type="text" class="form-input" id="activityBy" readonly>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="button-group">
+        <button class="btn btn-secondary btn-full" onclick="cancelActivity()">
+          Cancel
+        </button>
+        <button class="btn btn-primary btn-full" onclick="saveActivity()">
+          <span class="material-icons-round">save</span>
+          Save Activity
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Camera Modal -->
+  <div class="camera-modal" id="cameraModal">
+    <video class="camera-preview" id="cameraPreview"></video>
+    <button class="camera-btn close" onclick="closeCamera()">
+      <span class="material-icons-round">close</span>
+    </button>
+    <div class="camera-controls">
+      <button class="camera-btn capture" onclick="capturePhoto()"></button>
+    </div>
+  </div>
+  
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loading">
+    <div class="spinner"></div>
+    <div>Saving activity...</div>
+  </div>
+  
+  <!-- Toast Container -->
+  <div class="toast-container"></div>
+  
+  <script>
+    // App State
+    const state = {
+      images: [],
+      fhtcCount: 0,
+      location: null,
+      isOnline: navigator.onLine,
+      stream: null,
+      currentUser: null
+    };
+    
+    // Initialize
+    function init() {
+      // Check authentication
+      const savedUser = localStorage.getItem('trackmaster_user');
+      const sessionUser = sessionStorage.getItem('trackmaster_session');
+      
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          const expiryTime = userData.expiry || 0;
+          if (Date.now() < expiryTime) {
+            state.currentUser = userData;
+          }
+        } catch (e) {}
+      } else if (sessionUser) {
+        try {
+          state.currentUser = JSON.parse(sessionUser);
+        } catch (e) {}
+      }
+      
+      if (!state.currentUser) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Set current date
+      const today = new Date();
+      const formattedDate = today.toISOString().split('T')[0];
+      document.getElementById('activityDate').value = formattedDate;
+      document.getElementById('activityBy').value = state.currentUser.name || 'Current User';
+      
+      // Listen for FHTC selection
+      document.getElementById('activityType').addEventListener('change', function() {
+        const fhtcSection = document.getElementById('fhtcSection');
+        fhtcSection.style.display = this.value === 'FHTC Feeding' ? 'block' : 'none';
+      });
+      
+      // Network status
+      window.addEventListener('online', () => {
+        state.isOnline = true;
+      });
+      
+      window.addEventListener('offline', () => {
+        state.isOnline = false;
+        showToast('You are offline. Activity will be saved locally.', 'warning');
+      });
+    }
+    
+    // Keep all other functions from your existing newactivity.html
+    // (openImageSource, openCamera, closeCamera, capturePhoto, etc.)
+    
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      
+      const container = document.querySelector('.toast-container');
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    function goBack() {
+      window.location.href = 'index.html';
+    }
+    
+    function cancelActivity() {
+      if (confirm('Are you sure you want to cancel? Unsaved changes will be lost.')) {
+        window.location.href = 'index.html';
+      }
+    }
+    
+    function saveActivity() {
+      showToast('Activity saved successfully!', 'success');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1500);
+    }
+    
+    // Initialize on load
+    window.onload = init;
+  </script>
+</body>
+</html>

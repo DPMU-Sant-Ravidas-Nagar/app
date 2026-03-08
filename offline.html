@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: var(--surface);
+      color: var(--on-surface);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .offline-icon {
+      font-size: 64px;
+      color: var(--outline);
+      margin-bottom: 24px;
+    }
+    
+    h1 {
+      color: var(--primary);
+      margin-bottom: 16px;
+    }
+    
+    p {
+      color: var(--outline);
+      margin-bottom: 24px;
+      max-width: 300px;
+    }
+    
+    .retry-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .retry-btn:hover {
+      background: #5A4790;
+    }
+  </style>
+</head>
+<body>
+  <div class="material-icons-round offline-icon">cloud_off</div>
+  <h1>You're Offline</h1>
+  <p>Please check your internet connection and try again.</p>
+  <button class="retry-btn" onclick="window.location.href='index.html'">Retry</button>
+  
+  <script>
+    // Check connection periodically
+    setInterval(() => {
+      if (navigator.onLine) {
+        window.location.href = 'index.html';
+      }
+    }, 3000);
+  </script>
+</body>
+</html>

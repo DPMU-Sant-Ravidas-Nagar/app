@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#6750A4">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TrackMaster">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_192dp.png">
+  <link rel="apple-touch-icon" href="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_192dp.png">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <div class="app-shell">
+      <!-- App Bar -->
+      <div class="app-bar">
+        <div class="app-bar-content">
+          <div class="app-title">TrackMaster</div>
+        </div>
+        <div class="app-actions">
+          <button class="icon-button" onclick="refreshData()" title="Refresh">
+            <span class="material-icons-round">refresh</span>
+          </button>
+          <button class="icon-button" onclick="showNotifications()" title="Notifications">
+            <span class="material-icons-round">notifications</span>
+          </button>
+          <button class="icon-button" onclick="logout()" title="Logout">
+            <span class="material-icons-round">logout</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Offline Indicator -->
+      <div id="offlineIndicator" class="offline-indicator" style="display: none;">
+        <span class="material-icons-round">cloud_off</span>
+        You're offline - Changes will sync when online
+      </div>
+      
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="page-container">
+          <div class="page" id="currentPage">
+            <!-- Page content loaded dynamically -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Floating Action Button -->
+      <button class="fab" onclick="navigateTo('newactivity')" title="New Activity">
+        <span class="material-icons-round">add</span>
+      </button>
+      
+      <!-- Bottom Navigation -->
+      <div class="bottom-nav">
+        <a href="#" class="nav-item" onclick="navigateTo('home')">
+          <span class="material-icons-round nav-icon">home</span>
+          <span class="nav-label">Home</span>
+        </a>
+        <a href="#" class="nav-item" onclick="navigateTo('myactivity')">
+          <span class="material-icons-round nav-icon">list_alt</span>
+          <span class="nav-label">Activity</span>
+        </a>
+        <a href="#" class="nav-item" onclick="navigateTo('myteam')">
+          <span class="material-icons-round nav-icon">groups</span>
+          <span class="nav-label">Team</span>
+        </a>
+        <a href="#" class="nav-item" onclick="navigateTo('download')">
+          <span class="material-icons-round nav-icon">download</span>
+          <span class="nav-label">Reports</span>
+        </a>
+        <a href="#" class="nav-item" onclick="navigateTo('more')">
+          <span class="material-icons-round nav-icon">more_horiz</span>
+          <span class="nav-label">More</span>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Install Prompt -->
+    <div id="installPrompt" class="install-prompt" style="display: none;">
+      <div class="install-header">
+        <div class="install-icon">
+          <span class="material-icons-round">install_mobile</span>
+        </div>
+        <div>
+          <div class="install-title">Install TrackMaster</div>
+          <div class="install-subtitle">Add to home screen for better experience</div>
+        </div>
+      </div>
+      <div class="install-actions">
+        <button class="btn btn-primary" style="flex: 1;" onclick="installApp()">Install</button>
+        <button class="btn btn-secondary" style="flex: 1;" onclick="dismissInstall()">Not Now</button>
+      </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading">
+      <div class="spinner"></div>
+      <div id="loadingText">Loading...</div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+  </div>
+  
+  <script>
+    // App State
+    const appState = {
+      currentUser: null,
+      isOnline: navigator.onLine,
+      deferredPrompt: null,
+      currentPage: 'home',
+      isLoading: false,
+      offlineActivities: JSON.parse(localStorage.getItem('offlineActivities') || '[]'),
+      recentReports: JSON.parse(localStorage.getItem('recentReports') || '[]'),
+      reportType: 'weekly',
+      format: 'pdf',
+      previewData: null
+    };
+    
+    // Check authentication
+    function checkAuth() {
+      const savedUser = localStorage.getItem('trackmaster_user');
+      const sessionUser = sessionStorage.getItem('trackmaster_session');
+      
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          const expiryTime = userData.expiry || 0;
+          
+          if (Date.now() < expiryTime) {
+            appState.currentUser = userData;
+            return true;
+          } else {
+            localStorage.removeItem('trackmaster_user');
+          }
+        } catch (e) {
+          console.error('Error parsing saved user:', e);
+        }
+      } else if (sessionUser) {
+        try {
+          appState.currentUser = JSON.parse(sessionUser);
+          return true;
+        } catch (e) {
+          console.error('Error parsing session user:', e);
+        }
+      }
+      
+      // No valid session, redirect to login
+      window.location.href = 'login.html';
+      return false;
+    }
+    
+    // Initialize App
+    async function initApp() {
+      // Check authentication first
+      if (!checkAuth()) return;
+      
+      // Register Service Worker
+      registerServiceWorker();
+      
+      // Setup event listeners
+      setupEventListeners();
+      
+      // Load initial page
+      loadPage('home');
+      
+      // Show install prompt if applicable
+      setTimeout(checkInstallPrompt, 3000);
+    }
+    
+    // Rest of your existing JavaScript code remains exactly the same...
+    // (Keep all the existing functions: registerServiceWorker, setupEventListeners, 
+    // navigateTo, loadPage, loadDashboard, loadMyActivity, loadMyTeam, loadDownload, 
+    // loadMore, report functions, etc.)
+    
+    // Just make sure to remove any google.script.run references or replace them with
+    // mock data for GitHub Pages
+    
+    // For GitHub Pages demo, add mock data functions
+    async function loadDashboard() {
+      return `
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span class="material-icons-round">dashboard</span>
+              Quick Stats
+            </h3>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value">12</div>
+              <div class="stat-label">This Week</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">45</div>
+              <div class="stat-label">This Month</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">156</div>
+              <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">3</div>
+              <div class="stat-label">Pending</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span class="material-icons-round">today</span>
+              Today's Activities
+            </h3>
+          </div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-header">
+                <span class="activity-date">09:30 AM</span>
+                <span class="activity-day">FHTC Feeding</span>
+              </div>
+              <div class="activity-description">Completed FHTC feeding at Block A</div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-header">
+                <span class="activity-date">02:15 PM</span>
+                <span class="activity-day">Verification</span>
+              </div>
+              <div class="activity-description">Verified household data in Block B</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span class="material-icons-round">history</span>
+              Recent Activities
+            </h3>
+          </div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-header">
+                <span class="activity-date">Mar 15, 2026</span>
+                <span class="activity-day">Saturday</span>
+              </div>
+              <div class="activity-description">Field visit to Block C</div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-header">
+                <span class="activity-date">Mar 14, 2026</span>
+                <span class="activity-day">Friday</span>
+              </div>
+              <div class="activity-description">Team meeting and planning</div>
+            </div>
+            <div class="activity-item holiday">
+              <div class="activity-header">
+                <span class="activity-date">Mar 13, 2026</span>
+                <span class="activity-day">Thursday</span>
+              </div>
+              <div class="activity-description">Holiday - Holi</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Mock data for My Activity
+    async function loadMyActivity() {
+      return `
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span class="material-icons-round">calendar_today</span>
+              Monthly Summary
+            </h3>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value">12</div>
+              <div class="stat-label">Mar 2026</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">15</div>
+              <div class="stat-label">Feb 2026</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">18</div>
+              <div class="stat-label">Jan 2026</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">20</div>
+              <div class="stat-label">Dec 2025</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Mar 2026</h3>
+            <span class="activity-day">12 activities</span>
+          </div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-header">
+                <span class="activity-date">2026-03-15</span>
+                <span class="activity-day">Saturday</span>
+              </div>
+              <div class="activity-description">Field visit to Block C</div>
+              <div class="activity-meta">
+                <span class="activity-meta-item">
+                  <span class="material-icons-round" style="font-size: 16px;">location_on</span>
+                  Block C
+                </span>
+                <span class="activity-meta-item">
+                  <span class="material-icons-round" style="font-size: 16px;">category</span>
+                  Field Work
+                </span>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-header">
+                <span class="activity-date">2026-03-14</span>
+                <span class="activity-day">Friday</span>
+              </div>
+              <div class="activity-description">Team meeting and planning</div>
+              <div class="activity-meta">
+                <span class="activity-meta-item">
+                  <span class="material-icons-round" style="font-size: 16px;">category</span>
+                  Meeting
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Feb 2026</h3>
+            <span class="activity-day">15 activities</span>
+          </div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-header">
+                <span class="activity-date">2026-02-28</span>
+                <span class="activity-day">Friday</span>
+              </div>
+              <div class="activity-description">Monthly reporting</div>
+              <div class="activity-meta">
+                <span class="activity-meta-item">
+                  <span class="material-icons-round" style="font-size: 16px;">category</span>
+                  Reporting
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Mock data for My Team
+    async function loadMyTeam() {
+      return `
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span class="material-icons-round">groups</span>
+              My Team
+            </h3>
+          </div>
+          <div class="team-grid">
+            <div class="team-member">
+              <div class="member-header">
+                <div class="member-avatar">JD</div>
+                <div class="member-info">
+                  <h4>John Doe</h4>
+                  <div class="member-role">Team Lead</div>
+                </div>
+              </div>
+              <div class="member-id">EMP001</div>
+            </div>
+            <div class="team-member">
+              <div class="member-header">
+                <div class="member-avatar">JS</div>
+                <div class="member-info">
+                  <h4>Jane Smith</h4>
+                  <div class="member-role">Field Officer</div>
+                </div>
+              </div>
+              <div class="member-id">EMP002</div>
+            </div>
+            <div class="team-member">
+              <div class="member-header">
+                <div class="member-avatar">RJ</div>
+                <div class="member-info">
+                  <h4>Robert Johnson</h4>
+                  <div class="member-role">Data Entry</div>
+                </div>
+              </div>
+              <div class="member-id">EMP003</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Keep all other functions from your existing index.html
+    // (registerServiceWorker, setupEventListeners, navigateTo, loadPage,
+    // loadDownload, loadMore, report functions, etc.)
+    
+    // Initialize app when page loads
+    window.onload = initApp;
+  </script>
+</body>
+</html>
