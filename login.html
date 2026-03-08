@@ -8,9 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="api.js"></script>
   
   <style>
-    /* Login page specific styles */
     .login-container {
       width: 100%;
       height: 100vh;
@@ -18,6 +18,7 @@
       align-items: center;
       justify-content: center;
       padding: var(--spacing-lg);
+      background: var(--surface);
     }
     
     .login-card {
@@ -60,10 +61,6 @@
     .form-group {
       margin-bottom: var(--spacing-xl);
       text-align: left;
-    }
-    
-    .form-group:last-child {
-      margin-bottom: 0;
     }
     
     .form-label {
@@ -144,10 +141,6 @@
       font-size: 14px;
     }
     
-    .forgot-password a:hover {
-      text-decoration: underline;
-    }
-    
     .error-message {
       color: var(--error);
       margin: var(--spacing-md) 0;
@@ -155,7 +148,6 @@
       display: none;
     }
     
-    /* Biometric Login */
     .biometric-login {
       margin-top: var(--spacing-2xl);
       padding-top: var(--spacing-xl);
@@ -188,6 +180,16 @@
       font-size: 12px;
     }
     
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .shake {
+      animation: shake 0.5s;
+    }
+    
     @media (prefers-color-scheme: dark) {
       .login-card {
         background: #2D2B30;
@@ -198,16 +200,6 @@
         border-color: rgba(255, 255, 255, 0.2);
         color: var(--on-surface);
       }
-    }
-    
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-      20%, 40%, 60%, 80% { transform: translateX(5px); }
-    }
-    
-    .shake {
-      animation: shake 0.5s;
     }
   </style>
 </head>
@@ -223,8 +215,8 @@
       
       <form id="loginForm" onsubmit="return false;">
         <div class="form-group">
-          <label class="form-label">Username</label>
-          <input type="text" class="form-input" id="username" placeholder="Enter your username" required autocomplete="username">
+          <label class="form-label">Username (Staff ID)</label>
+          <input type="text" class="form-input" id="username" placeholder="Enter your staff ID" required autocomplete="username">
         </div>
         
         <div class="form-group">
@@ -239,7 +231,7 @@
         
         <div class="remember-me">
           <input type="checkbox" id="rememberMe">
-          <label for="rememberMe">Remember me</label>
+          <label for="rememberMe">Remember me for 7 days</label>
         </div>
         
         <div class="error-message" id="errorMessage"></div>
@@ -249,10 +241,9 @@
         </button>
         
         <div class="forgot-password">
-          <a href="#" onclick="forgotPassword()">Forgot password?</a>
+          <a href="#" onclick="forgotPassword()">Forgot password? Contact Admin</a>
         </div>
         
-        <!-- Biometric Login (if available) -->
         <div class="biometric-login" id="biometricLogin" style="display: none;">
           <button type="button" class="biometric-button" onclick="biometricLogin()">
             <span class="material-icons-round">fingerprint</span>
@@ -269,14 +260,10 @@
     <div>Logging in...</div>
   </div>
   
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+  
   <script>
-    // App State
-    const appState = {
-      currentUser: null,
-      isOnline: navigator.onLine,
-      deferredPrompt: null
-    };
-    
     // Check for saved credentials
     function checkSavedCredentials() {
       const savedUser = localStorage.getItem('trackmaster_user');
@@ -286,40 +273,30 @@
           const userData = JSON.parse(savedUser);
           const expiryTime = userData.expiry || 0;
           
-          // Check if token is still valid (7 days)
           if (Date.now() < expiryTime) {
-            appState.currentUser = userData;
-            redirectToHome();
+            window.location.href = 'index.html';
             return true;
           } else {
-            // Token expired, clear storage
             localStorage.removeItem('trackmaster_user');
-            localStorage.removeItem('savedUsername');
-            localStorage.removeItem('savedPassword');
           }
         } catch (e) {
           console.error('Error parsing saved user:', e);
-          localStorage.removeItem('trackmaster_user');
         }
       }
       
-      // Auto-fill saved credentials
+      // Auto-fill saved username
       const savedUsername = localStorage.getItem('savedUsername');
-      const savedPassword = localStorage.getItem('savedPassword');
-      
-      if (savedUsername && savedPassword) {
+      if (savedUsername) {
         document.getElementById('username').value = savedUsername;
-        document.getElementById('password').value = savedPassword;
         document.getElementById('rememberMe').checked = true;
       }
       
       return false;
     }
     
-    // Check for biometric authentication
+    // Check for biometric support
     function checkBiometricSupport() {
-      if (window.PublicKeyCredential && 
-          (localStorage.getItem('savedUsername') || localStorage.getItem('trackmaster_user'))) {
+      if (window.PublicKeyCredential && localStorage.getItem('savedUsername')) {
         document.getElementById('biometricLogin').style.display = 'block';
       }
     }
@@ -345,68 +322,42 @@
       const rememberMe = document.getElementById('rememberMe').checked;
       const errorElement = document.getElementById('errorMessage');
       
-      // Validate
       if (!username || !password) {
         showError('Please enter both username and password');
         return;
       }
       
-      // Show loading
       document.getElementById('loading').style.display = 'flex';
       errorElement.style.display = 'none';
       
       try {
-        // Simulate API call (replace with actual Google Apps Script)
-        // const result = await google.script.run
-        //   .withFailureHandler(handleLoginError)
-        //   .handleLogin({
-        //     username: username,
-        //     password: password
-        //   });
+        const result = await API.login(username, password);
+        document.getElementById('loading').style.display = 'none';
         
-        // For demo purposes
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        if (username === 'demo' && password === 'password') {
+        if (result.success) {
           const userData = {
-            name: 'Demo User',
-            email: 'demo@example.com',
-            role: 'User',
-            employeeId: 'EMP001'
+            ...result.user,
+            expiry: rememberMe ? Date.now() + (7 * 24 * 60 * 60 * 1000) : null
           };
           
-          // Save credentials if remember me is checked
           if (rememberMe) {
+            localStorage.setItem('trackmaster_user', JSON.stringify(userData));
             localStorage.setItem('savedUsername', username);
-            localStorage.setItem('savedPassword', password);
-            
-            // Save user session with 7-day expiry
-            const userWithExpiry = {
-              ...userData,
-              expiry: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
-            };
-            localStorage.setItem('trackmaster_user', JSON.stringify(userWithExpiry));
           } else {
-            localStorage.removeItem('savedUsername');
-            localStorage.removeItem('savedPassword');
-            sessionStorage.setItem('trackmaster_session', JSON.stringify(userData));
+            sessionStorage.setItem('trackmaster_session', JSON.stringify(result.user));
           }
           
-          appState.currentUser = userData;
-          redirectToHome();
+          showToast('Login successful! Redirecting...', 'success');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1000);
         } else {
-          handleLoginError('Invalid username or password');
+          showError(result.message || 'Invalid credentials');
         }
       } catch (error) {
-        handleLoginError(error);
-      } finally {
         document.getElementById('loading').style.display = 'none';
+        showError('Connection error. Please check your internet and try again.');
       }
-    }
-    
-    // Redirect to home
-    function redirectToHome() {
-      window.location.href = 'index.html';
     }
     
     // Biometric login
@@ -417,44 +368,25 @@
       }
       
       try {
-        // Try to get saved credentials
         const savedUser = localStorage.getItem('trackmaster_user');
         
         if (savedUser) {
-          // In a real app, this would use WebAuthn API
           showToast('Authenticating with biometrics...', 'info');
           
-          // Simulate biometric auth
+          // Simulate biometric check (in real app, use WebAuthn API)
           await new Promise(resolve => setTimeout(resolve, 1000));
           
-          appState.currentUser = JSON.parse(savedUser);
-          redirectToHome();
+          const userData = JSON.parse(savedUser);
+          window.location.href = 'index.html';
         } else {
           showError('No saved credentials found');
         }
       } catch (error) {
-        console.error('Biometric login error:', error);
         showError('Biometric authentication failed');
       }
     }
     
     // Error handling
-    function handleLoginError(error) {
-      console.error('Login error:', error);
-      
-      let errorMessage = 'Login failed. ';
-      
-      if (typeof error === 'string') {
-        errorMessage += error;
-      } else if (error && error.message) {
-        errorMessage += error.message;
-      } else {
-        errorMessage += 'Please try again.';
-      }
-      
-      showError(errorMessage);
-    }
-    
     function showError(message) {
       const errorElement = document.getElementById('errorMessage');
       errorElement.textContent = message;
@@ -471,23 +403,14 @@
       toast.className = `toast ${type}`;
       toast.textContent = message;
       
-      const container = document.querySelector('.toast-container');
-      if (container) {
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-      }
+      const container = document.getElementById('toastContainer');
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
     }
     
     // Forgot password
     function forgotPassword() {
-      const username = document.getElementById('username').value.trim();
-      
-      if (!username) {
-        showError('Please enter your username first');
-        return;
-      }
-      
-      alert(`Password reset instructions would be sent to the email associated with "${username}".\n\nFor now, please contact your administrator.`);
+      alert('Please contact your administrator to reset your password.');
     }
     
     // Enter key to submit
@@ -499,7 +422,6 @@
     
     // Initialize on load
     window.onload = function() {
-      // Check if already logged in
       if (!checkSavedCredentials()) {
         checkBiometricSupport();
         document.getElementById('username').focus();
