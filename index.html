@@ -13,15 +13,11 @@
   <link rel="icon" type="image/png" sizes="192x192" href="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_192dp.png">
   <link rel="apple-touch-icon" href="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_192dp.png">
   
-  <!-- Resource hints for faster loading -->
+  <!-- Preconnect for faster loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://script.google.com">
   <link rel="dns-prefetch" href="https://script.google.com">
-  
-  <!-- Preload critical resources -->
-  <link rel="preload" href="style.css" as="style">
-  <link rel="preload" href="api.js" as="script">
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -29,176 +25,57 @@
   <link rel="stylesheet" href="style.css">
   
   <style>
-    /* Critical CSS for above-the-fold content */
-    :root {
-      --primary: #6750A4;
-      --primary-light: #EADDFF;
-      --on-primary: #FFFFFF;
-      --surface: #FEF7FF;
-      --surface-container: #F3EDF7;
-      --on-surface: #1D1B20;
-      --outline: #79747E;
-      --error: #B3261E;
-      --success: #0D904F;
-      --warning: #FFC107;
-      --shadow: 0 2px 8px rgba(0,0,0,0.1);
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
-      --radius-full: 999px;
-      --spacing-xs: 4px;
-      --spacing-sm: 8px;
-      --spacing-md: 12px;
-      --spacing-lg: 16px;
-      --spacing-xl: 24px;
-      --header-height: 64px;
-      --safe-top: env(safe-area-inset-top, 0);
-      --safe-bottom: env(safe-area-inset-bottom, 0);
-    }
-    
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body {
-      font-family: 'Inter', -apple-system, sans-serif;
-      background: var(--surface);
-      color: var(--on-surface);
-      height: 100vh;
-      overflow: hidden;
-    }
-    
-    #app { width: 100%; height: 100%; }
-    
-    .app-shell { height: 100%; display: flex; flex-direction: column; }
-    
-    .app-bar {
-      background: var(--primary);
-      color: var(--on-primary);
-      padding: var(--spacing-md) var(--spacing-lg);
-      padding-top: calc(var(--spacing-md) + var(--safe-top));
+    /* Additional styles */
+    .filter-bar {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 1000;
+      gap: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding: 5px 0;
     }
     
-    .app-title { font-size: 20px; font-weight: 600; }
-    
-    .main-content { flex: 1; overflow: hidden; position: relative; }
-    
-    .page-container {
-      height: 100%;
-      overflow-y: auto;
-      padding: var(--spacing-lg);
-      padding-bottom: calc(80px + var(--safe-bottom));
-    }
-    
-    .bottom-nav {
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-around;
-      padding: var(--spacing-sm) var(--spacing-xs);
-      padding-bottom: calc(var(--spacing-sm) + var(--safe-bottom));
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-    }
-    
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--spacing-xs);
-      color: var(--outline);
-      text-decoration: none;
-      padding: var(--spacing-sm);
-      border-radius: var(--radius-lg);
-      flex: 1;
-      max-width: 80px;
+    .filter-chip {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--surface-container);
+      border: none;
       cursor: pointer;
+      white-space: nowrap;
+      font-size: 14px;
     }
     
-    .nav-item.active {
-      color: var(--primary);
-      background: var(--primary-light);
-    }
-    
-    .fab {
-      position: fixed;
-      bottom: calc(80px + var(--safe-bottom));
-      right: var(--spacing-lg);
-      width: 56px;
-      height: 56px;
-      border-radius: var(--radius-xl);
+    .filter-chip.active {
       background: var(--primary);
       color: white;
-      border: none;
-      box-shadow: 0 4px 12px rgba(103,80,164,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 999;
     }
     
-    .card {
-      background: white;
-      border-radius: var(--radius-md);
-      padding: var(--spacing-lg);
-      margin-bottom: var(--spacing-lg);
-      box-shadow: var(--shadow);
+    .badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
     }
     
-    .stats-grid {
+    .activity-item.pending {
+      border-left-color: var(--warning);
+    }
+    
+    .report-types {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: var(--spacing-md);
-    }
-    
-    .stat-card {
-      background: var(--surface-container);
-      border-radius: var(--radius-sm);
-      padding: var(--spacing-lg);
-      text-align: center;
-    }
-    
-    .stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-    
-    .skeleton {
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-      border-radius: var(--radius-sm);
-    }
-    
-    @keyframes loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-    
-    /* Report Types */
-    .report-types {
-      display: flex;
-      flex-direction: column;
       gap: 12px;
       margin-bottom: 24px;
     }
     
     .report-type-card {
-      background: var(--surface-container);
-      border-radius: 16px;
+      background: var(--white);
+      border-radius: var(--radius);
       padding: 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
+      box-shadow: var(--shadow);
+      text-align: center;
       cursor: pointer;
+      transition: all 0.2s;
       border: 2px solid transparent;
     }
     
@@ -211,27 +88,18 @@
       width: 48px;
       height: 48px;
       border-radius: 12px;
-      background: white;
+      background: var(--primary-light);
       color: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      margin: 0 auto 12px;
+      font-size: 20px;
     }
     
     .report-type-card.selected .report-icon {
       background: var(--primary);
       color: white;
-    }
-    
-    .report-title {
-      font-size: 16px;
-      font-weight: 600;
-    }
-    
-    .report-desc {
-      font-size: 13px;
-      color: var(--outline);
     }
     
     .date-range {
@@ -243,6 +111,7 @@
     .format-options {
       display: flex;
       gap: 12px;
+      margin-top: 8px;
     }
     
     .format-option {
@@ -252,6 +121,7 @@
       border-radius: 8px;
       text-align: center;
       cursor: pointer;
+      transition: all 0.2s;
     }
     
     .format-option.selected {
@@ -259,30 +129,187 @@
       background: var(--primary-light);
     }
     
-    .toast-container {
-      position: fixed;
-      bottom: calc(80px + var(--safe-bottom) + var(--spacing-lg));
-      left: 0;
-      right: 0;
-      z-index: 2000;
+    .format-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: var(--outline);
+    }
+    
+    .format-option.selected .format-icon {
+      color: var(--primary);
+    }
+    
+    .report-preview {
+      background: var(--surface-container);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .preview-content {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--outline);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--surface);
+    }
+    
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    
+    .preview-table th {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 8px;
+      text-align: left;
+      border-bottom: 2px solid var(--primary);
+    }
+    
+    .preview-table td {
+      padding: 8px;
+      border-bottom: 1px solid var(--outline);
+    }
+    
+    .recent-reports {
+      background: var(--surface-container);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-top: 24px;
+    }
+    
+    .reports-list {
       display: flex;
       flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    
+    .report-item {
+      display: flex;
       align-items: center;
-      pointer-events: none;
+      gap: 12px;
+      padding: 12px;
+      background: var(--surface);
+      border-radius: 8px;
+      cursor: pointer;
     }
     
-    .toast {
-      background: var(--on-surface);
-      color: white;
-      padding: 12px 24px;
-      border-radius: var(--radius-full);
+    .report-item-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .report-item-info {
+      flex: 1;
+    }
+    
+    .report-item-name {
+      font-weight: 600;
       font-size: 14px;
-      animation: slideUp 0.3s ease;
+      margin-bottom: 2px;
     }
     
-    @keyframes slideUp {
-      from { transform: translateY(100%); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    .report-item-details {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--outline);
+    }
+    
+    .action-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: none;
+      color: var(--outline);
+      cursor: pointer;
+    }
+    
+    .more-menu {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+    
+    .more-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      padding: var(--spacing-lg);
+      background: var(--surface-container);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+    }
+    
+    .more-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .more-content {
+      flex: 1;
+    }
+    
+    .more-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .more-subtitle {
+      font-size: 12px;
+      color: var(--outline);
+    }
+    
+    .info-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--spacing-sm) 0;
+      border-bottom: 1px solid var(--outline);
+    }
+    
+    .error-container {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    
+    .error-icon {
+      font-size: 48px;
+      color: var(--error);
+      margin-bottom: 16px;
+    }
+    
+    .retry-button {
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -327,23 +354,23 @@
       
       <!-- Bottom Navigation -->
       <div class="bottom-nav">
-        <a href="#" class="nav-item" onclick="handleNavClick('home'); return false;">
+        <a href="#" class="nav-item" onclick="navigateTo('home'); return false;">
           <span class="material-icons-round nav-icon">home</span>
           <span class="nav-label">Home</span>
         </a>
-        <a href="#" class="nav-item" onclick="handleNavClick('myactivity'); return false;">
+        <a href="#" class="nav-item" onclick="navigateTo('myactivity'); return false;">
           <span class="material-icons-round nav-icon">list_alt</span>
           <span class="nav-label">Activity</span>
         </a>
-        <a href="#" class="nav-item" onclick="handleNavClick('myteam'); return false;">
+        <a href="#" class="nav-item" onclick="navigateTo('myteam'); return false;">
           <span class="material-icons-round nav-icon">groups</span>
           <span class="nav-label">Team</span>
         </a>
-        <a href="#" class="nav-item" onclick="handleNavClick('reports'); return false;">
+        <a href="#" class="nav-item" onclick="navigateTo('reports'); return false;">
           <span class="material-icons-round nav-icon">download</span>
           <span class="nav-label">Reports</span>
         </a>
-        <a href="#" class="nav-item" onclick="handleNavClick('more'); return false;">
+        <a href="#" class="nav-item" onclick="navigateTo('more'); return false;">
           <span class="material-icons-round nav-icon">more_horiz</span>
           <span class="nav-label">More</span>
         </a>
@@ -379,7 +406,7 @@
   
   <script src="api.js"></script>
   <script>
-    // ==================== OPTIMIZED APP STATE ====================
+    // App State
     const appState = {
       currentUser: null,
       isOnline: navigator.onLine,
@@ -392,112 +419,97 @@
       previewData: null
     };
     
-    // ==================== ENHANCED CACHE SYSTEM ====================
-    const pageCache = {
-      data: new Map(),
-      maxAge: 5 * 60 * 1000, // 5 minutes
+    // Page Cache
+    const pageCache = new Map();
+    
+    // Check authentication
+    function checkAuth() {
+      const savedUser = localStorage.getItem('trackmaster_user');
+      const sessionUser = sessionStorage.getItem('trackmaster_session');
       
-      get(key) {
-        const item = this.data.get(key);
-        if (item && (Date.now() - item.timestamp) < this.maxAge) {
-          return item.value;
-        }
-        this.data.delete(key);
-        return null;
-      },
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          if (Date.now() < (userData.expiry || 0)) {
+            appState.currentUser = userData;
+            return true;
+          }
+        } catch (e) {}
+      } else if (sessionUser) {
+        try {
+          appState.currentUser = JSON.parse(sessionUser);
+          return true;
+        } catch (e) {}
+      }
       
-      set(key, value) {
-        this.data.set(key, {
-          value,
-          timestamp: Date.now()
+      window.location.href = 'login.html';
+      return false;
+    }
+    
+    // Initialize App
+    async function initApp() {
+      if (!checkAuth()) return;
+      
+      setupEventListeners();
+      registerServiceWorker();
+      
+      const hash = window.location.hash.substring(1);
+      const initialPage = hash || 'home';
+      
+      updateActiveNav(initialPage);
+      await navigateTo(initialPage, false);
+      
+      setTimeout(checkInstallPrompt, 3000);
+    }
+    
+    // Register Service Worker
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.log('ServiceWorker registration failed:', err);
         });
-      },
+      }
+    }
+    
+    // Setup event listeners
+    function setupEventListeners() {
+      window.addEventListener('online', () => {
+        appState.isOnline = true;
+        document.getElementById('offlineIndicator').style.display = 'none';
+        showToast('You are back online!', 'success');
+        syncOfflineActivities();
+      });
       
-      clear() {
-        this.data.clear();
-      }
-    };
+      window.addEventListener('offline', () => {
+        appState.isOnline = false;
+        document.getElementById('offlineIndicator').style.display = 'flex';
+        showToast('You are offline', 'warning');
+      });
+      
+      window.addEventListener('popstate', (e) => {
+        const page = e.state?.page || 'home';
+        navigateTo(page, false);
+      });
+      
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        appState.deferredPrompt = e;
+      });
+    }
     
-    // ==================== PRELOADING SYSTEM ====================
-    const preloadQueue = ['myactivity', 'myteam', 'reports', 'more'];
-    let preloadIndex = 0;
-    
-    function preloadNextPages() {
-      if (preloadIndex < preloadQueue.length) {
-        const nextPage = preloadQueue[preloadIndex];
-        if (nextPage !== appState.currentPage) {
-          setTimeout(() => {
-            loadPageContent(nextPage, true).then(html => {
-              if (html) pageCache.set(nextPage, html);
-            }).catch(() => {});
-          }, 1000);
+    // Update active navigation
+    function updateActiveNav(page) {
+      const navMap = { home: 0, myactivity: 1, myteam: 2, reports: 3, more: 4 };
+      document.querySelectorAll('.nav-item').forEach((item, index) => {
+        if (index === navMap[page]) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
         }
-        preloadIndex++;
-      }
+      });
     }
     
-    // ==================== SKELETON LOADERS ====================
-    function getOptimizedSkeleton(page) {
-      const skeletons = {
-        home: `
-          <div class="card"><div class="skeleton" style="height: 24px; width: 60%;"></div></div>
-          <div class="stats-grid">
-            ${Array(4).fill().map(() => `
-              <div class="stat-card"><div class="skeleton" style="height: 40px;"></div></div>
-            `).join('')}
-          </div>
-        `,
-        myactivity: `
-          <div class="filter-bar" style="display: flex; gap: 10px; margin-bottom: 20px;">
-            ${Array(3).fill().map(() => `<div class="skeleton" style="width: 80px; height: 36px; border-radius: 20px;"></div>`).join('')}
-          </div>
-          ${Array(2).fill().map(() => `
-            <div class="card">
-              <div class="skeleton" style="height: 24px; width: 40%;"></div>
-              ${Array(3).fill().map(() => `
-                <div class="skeleton" style="height: 80px; margin: 12px 0;"></div>
-              `).join('')}
-            </div>
-          `).join('')}
-        `,
-        myteam: `
-          <div class="card">
-            <div class="skeleton" style="height: 24px; width: 40%;"></div>
-            ${Array(4).fill().map(() => `
-              <div class="skeleton" style="height: 120px; margin: 12px 0;"></div>
-            `).join('')}
-          </div>
-        `,
-        reports: `
-          ${Array(2).fill().map(() => `
-            <div class="skeleton" style="height: 80px; margin-bottom: 12px; border-radius: 16px;"></div>
-          `).join('')}
-          <div class="card">
-            <div class="skeleton" style="height: 200px;"></div>
-          </div>
-        `,
-        more: `
-          <div class="card">
-            <div style="display: flex; gap: 16px;">
-              <div class="skeleton" style="width: 64px; height: 64px; border-radius: 50%;"></div>
-              <div style="flex:1"><div class="skeleton" style="height: 60px;"></div></div>
-            </div>
-          </div>
-          ${Array(4).fill().map(() => `<div class="skeleton" style="height: 70px; margin-bottom: 8px;"></div>`).join('')}
-        `
-      };
-      return skeletons[page] || '<div class="card"><div class="skeleton" style="height: 200px;"></div></div>';
-    }
-    
-    // ==================== NAVIGATION ====================
-    let navigationTimeout;
-    function handleNavClick(page) {
-      if (navigationTimeout) clearTimeout(navigationTimeout);
-      navigationTimeout = setTimeout(() => {
-        navigateTo(page);
-      }, 50); // Debounce rapid clicks
-    }
-    
+    // Navigation
     async function navigateTo(page, addToHistory = true) {
       event?.preventDefault();
       
@@ -510,52 +522,19 @@
       
       const container = document.getElementById('currentPage');
       
-      // Check cache first - show instantly
-      const cached = pageCache.get(page);
-      if (cached) {
-        container.innerHTML = cached;
-        
-        // Refresh in background
-        setTimeout(() => {
-          loadPageContent(page, true).then(html => {
-            if (html) {
-              pageCache.set(page, html);
-              if (appState.currentPage === page) {
-                container.innerHTML = html;
-              }
-            }
-          });
-        }, 500);
-        
-        return;
-      }
+      // Show loading
+      container.innerHTML = `
+        <div class="card">
+          <div class="loading">Loading...</div>
+        </div>
+      `;
       
-      // Show skeleton immediately
-      container.innerHTML = getOptimizedSkeleton(page);
-      
-      // Load fresh content
       await loadPageContent(page);
-      
-      // Start preloading next pages
-      preloadNextPages();
     }
     
-    function updateActiveNav(page) {
-      const navMap = { home: 0, myactivity: 1, myteam: 2, reports: 3, more: 4 };
-      document.querySelectorAll('.nav-item').forEach((item, index) => {
-        if (index === navMap[page]) {
-          item.classList.add('active');
-        } else {
-          item.classList.remove('active');
-        }
-      });
-    }
-    
-    // ==================== PAGE LOADER ====================
-    async function loadPageContent(page, isBackground = false) {
-      if (!isBackground) {
-        document.getElementById('loading').style.display = 'flex';
-      }
+    // Load page content
+    async function loadPageContent(page) {
+      const container = document.getElementById('currentPage');
       
       try {
         let html = '';
@@ -579,47 +558,36 @@
         }
         
         pageCache.set(page, html);
+        container.innerHTML = html;
         
-        if (!isBackground) {
-          document.getElementById('currentPage').innerHTML = html;
-          if (page === 'reports') initReportsPage();
-        }
-        
-        return html;
+        // Initialize page-specific functions
+        if (page === 'reports') initReportsPage();
         
       } catch (error) {
         console.error('Error loading page:', error);
-        if (!isBackground) {
-          document.getElementById('currentPage').innerHTML = `
-            <div class="card" style="text-align: center; padding: 40px;">
-              <span class="material-icons-round" style="font-size: 48px; color: var(--error);">error</span>
-              <h3>Failed to Load</h3>
-              <p style="color: var(--outline); margin: 16px 0;">${error.message}</p>
-              <button class="btn btn-primary" onclick="navigateTo('${page}')">Retry</button>
-            </div>
-          `;
-        }
-        return null;
-      } finally {
-        if (!isBackground) {
-          document.getElementById('loading').style.display = 'none';
-        }
+        container.innerHTML = `
+          <div class="card error-container">
+            <span class="material-icons-round error-icon">error</span>
+            <h3>Failed to Load</h3>
+            <p style="color: var(--outline); margin: 16px 0;">${error.message || 'Unknown error'}</p>
+            <button class="btn btn-primary retry-button" onclick="navigateTo('${page}')">
+              Retry
+            </button>
+          </div>
+        `;
       }
     }
     
-    // ==================== DASHBOARD ====================
+    // Load Dashboard
     async function loadDashboard() {
       if (!appState.currentUser) return '<div class="card">Please login</div>';
       
       try {
-        // Load stats first
-        const statsResult = await API.getDashboardStats(appState.currentUser.staffId);
+        const result = await API.getDashboardStats(appState.currentUser.staffId);
         
-        let html = '';
-        
-        if (statsResult.success) {
-          const stats = statsResult.stats || {};
-          html = `
+        if (result.success) {
+          const stats = result.stats || {};
+          return `
             <div class="card">
               <div class="card-header">
                 <h3 class="card-title">
@@ -648,54 +616,23 @@
             </div>
           `;
         }
-        
-        // Load activities in background
-        setTimeout(async () => {
-          try {
-            const activitiesResult = await API.getUserActivities(appState.currentUser.staffId, 'all');
-            if (activitiesResult.success && activitiesResult.activities?.length > 0) {
-              const recentHtml = `
-                <div class="card">
-                  <div class="card-header">
-                    <h3 class="card-title">Recent Activities</h3>
-                  </div>
-                  <div class="activity-list">
-                    ${activitiesResult.activities.slice(0, 3).map(a => `
-                      <div class="activity-item" onclick="editActivity('${a.rowId}')">
-                        <div class="activity-header">
-                          <span class="activity-date">${a.date || ''}</span>
-                        </div>
-                        <div class="activity-description">${escapeHtml(a.description || '')}</div>
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
-              `;
-              
-              const container = document.getElementById('currentPage');
-              if (container && appState.currentPage === 'home') {
-                container.innerHTML = html + recentHtml;
-                pageCache.set('home', container.innerHTML);
-              }
-            }
-          } catch (e) {}
-        }, 500);
-        
-        return html;
-        
+        return '<div class="card">No data available</div>';
       } catch (error) {
+        console.error('Dashboard error:', error);
         return '<div class="card">Error loading dashboard</div>';
       }
     }
     
-    // ==================== MY ACTIVITY ====================
+    // Load My Activity - FIXED
     async function loadMyActivity() {
       if (!appState.currentUser) return '<div class="card">Please login</div>';
       
       try {
+        console.log('Loading activities for:', appState.currentUser.staffId);
         const result = await API.getUserActivities(appState.currentUser.staffId, 'all');
+        console.log('Activities result:', result);
         
-        if (result.success && result.activities?.length > 0) {
+        if (result.success && result.activities && result.activities.length > 0) {
           // Group by month
           const grouped = {};
           result.activities.forEach(activity => {
@@ -707,7 +644,7 @@
           });
           
           let html = `
-            <div class="filter-bar" style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto;">
+            <div class="filter-bar">
               <button class="filter-chip active" onclick="filterActivities('all')">All</button>
               <button class="filter-chip" onclick="filterActivities('weekly')">This Week</button>
               <button class="filter-chip" onclick="filterActivities('monthly')">This Month</button>
@@ -719,19 +656,29 @@
               <div class="card">
                 <div class="card-header">
                   <h3 class="card-title">${month}</h3>
-                  <span class="badge" style="background: var(--primary-light); color: var(--primary); padding: 4px 8px; border-radius: 12px;">${activities.length} activities</span>
+                  <span class="badge">${activities.length} activities</span>
                 </div>
                 <div class="activity-list">
                   ${activities.map(a => `
-                    <div class="activity-item ${a.status === 'Pending Approval' ? 'pending' : ''}" onclick="editActivity('${a.rowId}')" style="cursor: pointer; border-left: 4px solid ${a.status === 'Approved' ? 'var(--success)' : 'var(--warning)'};">
-                      <div class="activity-header" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span class="activity-date" style="font-weight: 600;">${a.date || 'No date'}</span>
-                        <span class="activity-day" style="color: ${a.status === 'Approved' ? 'var(--success)' : 'var(--warning)'}">${a.status || 'Unknown'}</span>
+                    <div class="activity-item ${a.status === 'Pending Approval' ? 'pending' : ''}" onclick="editActivity('${a.rowId}')">
+                      <div class="activity-header">
+                        <span class="activity-date">${a.date || 'No date'}</span>
+                        <span class="activity-day" style="color: ${a.status === 'Approved' ? 'var(--success)' : 'var(--warning)'}">
+                          ${a.status || 'Unknown'}
+                        </span>
                       </div>
-                      <div class="activity-description" style="margin-bottom: 8px;">${escapeHtml(a.description || 'No description')}</div>
-                      <div class="activity-meta" style="display: flex; gap: 16px; font-size: 12px; color: var(--outline);">
-                        ${a.location ? `<span><span class="material-icons-round" style="font-size: 14px;">location_on</span> ${a.location}</span>` : ''}
-                        <span><span class="material-icons-round" style="font-size: 14px;">groups</span> ${a.teamMembers?.length || 1} members</span>
+                      <div class="activity-description">${escapeHtml(a.description || 'No description')}</div>
+                      <div class="activity-meta">
+                        ${a.location ? `
+                          <span class="activity-meta-item">
+                            <span class="material-icons-round">location_on</span>
+                            ${a.location}
+                          </span>
+                        ` : ''}
+                        <span class="activity-meta-item">
+                          <span class="material-icons-round">groups</span>
+                          ${a.teamMembers?.length || 1} member(s)
+                        </span>
                       </div>
                     </div>
                   `).join('')}
@@ -743,28 +690,43 @@
           return html;
         }
         
+        // No activities
         return `
-          <div class="card" style="text-align: center; padding: 40px 20px;">
-            <span class="material-icons-round" style="font-size: 48px; color: var(--outline);">assignment</span>
-            <h3>No Activities Found</h3>
-            <p style="color: var(--outline); margin: 20px 0;">Start by adding your first activity</p>
-            <button class="btn btn-primary" onclick="window.location.href='newactivity.html'">
-              <span class="material-icons-round">add</span> Add New Activity
-            </button>
+          <div class="card">
+            <div style="text-align: center; padding: 40px 20px;">
+              <span class="material-icons-round" style="font-size: 48px; color: var(--outline);">assignment</span>
+              <h3>No Activities Found</h3>
+              <p style="color: var(--outline); margin: 20px 0;">Start by adding your first activity</p>
+              <button class="btn btn-primary" onclick="window.location.href='newactivity.html'">
+                <span class="material-icons-round">add</span>
+                Add New Activity
+              </button>
+            </div>
           </div>
         `;
       } catch (error) {
         console.error('Activity error:', error);
-        return '<div class="card">Error loading activities</div>';
+        return `
+          <div class="card error-container">
+            <span class="material-icons-round error-icon">error</span>
+            <h3>Failed to Load Activities</h3>
+            <p style="color: var(--outline); margin: 16px 0;">${error.message}</p>
+            <button class="btn btn-primary retry-button" onclick="loadPageContent('myactivity')">
+              Retry
+            </button>
+          </div>
+        `;
       }
     }
     
-    // ==================== MY TEAM ====================
+    // Load My Team - FIXED with all columns
     async function loadMyTeam() {
       try {
+        console.log('Loading team members...');
         const result = await API.getTeamMembers();
+        console.log('Team result:', result);
         
-        if (result.success && result.members?.length > 0) {
+        if (result.success && result.members && result.members.length > 0) {
           return `
             <div class="card">
               <div class="card-header">
@@ -773,19 +735,19 @@
                   Team Members (${result.members.length})
                 </h3>
               </div>
-              <div class="team-grid" style="display: grid; gap: 16px;">
+              <div class="team-grid">
                 ${result.members.map(member => `
-                  <div class="team-member" style="background: var(--surface-container); border-radius: 12px; padding: 16px;">
-                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
-                      <div class="member-avatar" style="width: 48px; height: 48px; border-radius: 50%; background: ${getAvatarColor(member.staffId || '')}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                  <div class="team-member">
+                    <div class="member-header">
+                      <div class="member-avatar" style="background: ${getAvatarColor(member.staffId || '')}">
                         ${getInitials(member.name)}
                       </div>
-                      <div>
-                        <h4 style="margin-bottom: 4px;">${escapeHtml(member.name || 'Unknown')}</h4>
-                        <div style="color: var(--outline); font-size: 13px;">${escapeHtml(member.designation || 'Team Member')}</div>
+                      <div class="member-info">
+                        <h4>${escapeHtml(member.name || 'Unknown')}</h4>
+                        <div class="member-role">${escapeHtml(member.designation || 'Team Member')}</div>
                       </div>
                     </div>
-                    <div style="font-size: 13px;">
+                    <div style="margin-top: 12px; font-size: 13px;">
                       <div style="margin-bottom: 4px;"><strong>ID:</strong> ${escapeHtml(member.staffId || 'N/A')}</div>
                       <div style="margin-bottom: 4px;"><strong>Contact:</strong> ${escapeHtml(member.contactNo || 'N/A')}</div>
                       <div style="margin-bottom: 4px;"><strong>Email:</strong> ${escapeHtml(member.email || 'N/A')}</div>
@@ -798,255 +760,34 @@
           `;
         }
         
-        return '<div class="card">No team members found</div>';
-      } catch (error) {
-        return '<div class="card">Error loading team</div>';
-      }
-    }
-    
-    // ==================== REPORTS ====================
-    function loadReports() {
-      return `
-        <div class="report-types">
-          <div class="report-type-card ${appState.reportType === 'weekly' ? 'selected' : ''}" onclick="selectReportType('weekly')">
-            <div class="report-icon">
-              <span class="material-icons-round">calendar_month</span>
-            </div>
-            <div class="report-text">
-              <div class="report-title">Weekly Timesheet</div>
-              <div class="report-desc">Last 7 days summary</div>
-            </div>
-          </div>
-          
-          <div class="report-type-card ${appState.reportType === 'monthly' ? 'selected' : ''}" onclick="selectReportType('monthly')">
-            <div class="report-icon">
-              <span class="material-icons-round">calendar_today</span>
-            </div>
-            <div class="report-text">
-              <div class="report-title">Monthly Report</div>
-              <div class="report-desc">Complete month summary</div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">
-              <span class="material-icons-round">settings</span>
-              Report Configuration
-            </h3>
-          </div>
-          
-          <div class="form-group" style="margin-bottom: 16px;">
-            <label class="form-label required">Date Range</label>
-            <div class="date-range">
-              <div>
-                <label style="font-size: 12px; color: var(--outline);">Start Date</label>
-                <input type="date" class="form-input" id="startDate" style="width: 100%; padding: 10px; border: 1px solid var(--outline); border-radius: 8px;" required>
-              </div>
-              <div>
-                <label style="font-size: 12px; color: var(--outline);">End Date</label>
-                <input type="date" class="form-input" id="endDate" style="width: 100%; padding: 10px; border: 1px solid var(--outline); border-radius: 8px;" required>
-              </div>
-            </div>
-          </div>
-          
-          <div class="form-group" style="margin-bottom: 16px;">
-            <label class="form-label required">Format</label>
-            <div class="format-options">
-              <div class="format-option ${appState.format === 'pdf' ? 'selected' : ''}" onclick="selectFormat('pdf')">
-                <div class="format-icon"><i class="fas fa-file-pdf"></i></div>
-                <div class="format-name">PDF</div>
-              </div>
-              <div class="format-option ${appState.format === 'excel' ? 'selected' : ''}" onclick="selectFormat('excel')">
-                <div class="format-icon"><i class="fas fa-file-excel"></i></div>
-                <div class="format-name">Excel</div>
-              </div>
-              <div class="format-option ${appState.format === 'csv' ? 'selected' : ''}" onclick="selectFormat('csv')">
-                <div class="format-icon"><i class="fas fa-file-csv"></i></div>
-                <div class="format-name">CSV</div>
-              </div>
-            </div>
-          </div>
-          
-          <div style="display: flex; gap: 16px; margin-top: 24px;">
-            <button class="btn btn-secondary" style="flex: 1; padding: 12px;" onclick="previewReport()">
-              <span class="material-icons-round">visibility</span> Preview
-            </button>
-            <button class="btn btn-primary" style="flex: 1; padding: 12px;" onclick="generateReport()">
-              <span class="material-icons-round">download</span> Download
-            </button>
-          </div>
-        </div>
-        
-        <div class="report-preview" id="reportPreview" style="display: none; background: var(--surface-container); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-          <div class="preview-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3>Report Preview</h3>
-            <button class="action-btn" onclick="closePreview()" style="width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--surface); cursor: pointer;">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <div class="preview-content" id="previewContent" style="max-height: 300px; overflow-y: auto; background: var(--surface); padding: 12px; border-radius: 8px;"></div>
-        </div>
-        
-        <div class="recent-reports" style="background: var(--surface-container); border-radius: 12px; padding: 20px;">
-          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 class="card-title">
-              <span class="material-icons-round">history</span>
-              Recent Reports
-            </h3>
-          </div>
-          
-          <div class="reports-list" id="recentReportsList" style="display: flex; flex-direction: column; gap: 12px;">
-            ${renderRecentReports()}
-          </div>
-        </div>
-      `;
-    }
-    
-    function renderRecentReports() {
-      if (!appState.recentReports || appState.recentReports.length === 0) {
-        return '<div style="text-align: center; padding: 20px; color: var(--outline);">No recent reports</div>';
-      }
-      
-      return appState.recentReports.slice(0, 5).map((report, index) => {
-        const icon = report.format === 'pdf' ? 'file-pdf' : 
-                    report.format === 'excel' ? 'file-excel' : 'file-csv';
-        
         return `
-          <div class="report-item" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--surface); border-radius: 8px;">
-            <div class="report-item-icon" style="width: 40px; height: 40px; border-radius: 8px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <i class="fas fa-${icon}"></i>
-            </div>
-            <div class="report-item-info" style="flex: 1;">
-              <div class="report-item-name" style="font-weight: 600;">${report.name || 'Report'}</div>
-              <div class="report-item-details" style="display: flex; gap: 12px; font-size: 12px; color: var(--outline);">
-                <span>${report.type || 'Report'}</span>
-                <span>${report.date || ''}</span>
-              </div>
-            </div>
-            <div class="report-item-actions" style="display: flex; gap: 4px;">
-              <button class="action-btn" onclick="downloadRecentReport(${index})" style="width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--surface); cursor: pointer;">
-                <i class="fas fa-download"></i>
-              </button>
-              <button class="action-btn" onclick="deleteRecentReport(${index})" style="width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--surface); cursor: pointer;">
-                <i class="fas fa-trash"></i>
-              </button>
+          <div class="card">
+            <div style="text-align: center; padding: 40px;">
+              <span class="material-icons-round" style="font-size: 48px; color: var(--outline);">groups</span>
+              <h3>No Team Members Found</h3>
             </div>
           </div>
         `;
-      }).join('');
+      } catch (error) {
+        console.error('Team error:', error);
+        return `
+          <div class="card error-container">
+            <span class="material-icons-round error-icon">error</span>
+            <h3>Failed to Load Team</h3>
+            <p style="color: var(--outline); margin: 16px 0;">${error.message}</p>
+            <button class="btn btn-primary retry-button" onclick="loadPageContent('myteam')">
+              Retry
+            </button>
+          </div>
+        `;
+      }
     }
     
-    // ==================== MORE TAB ====================
-    function loadMore() {
-      return `
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">
-              <span class="material-icons-round">person</span>
-              Profile
-            </h3>
-          </div>
-          <div style="display: flex; align-items: center; gap: 24px; padding: 16px;">
-            <div class="member-avatar" style="width: 64px; height: 64px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600;">
-              ${getInitials(appState.currentUser?.name)}
-            </div>
-            <div>
-              <h4>${escapeHtml(appState.currentUser?.name || 'User')}</h4>
-              <div style="color: var(--outline);">${escapeHtml(appState.currentUser?.staffId || '')}</div>
-              <div style="color: var(--outline);">${escapeHtml(appState.currentUser?.designation || '')}</div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="more-menu" style="display: flex; flex-direction: column; gap: 8px;">
-          <div class="more-item" onclick="showProfile()" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface-container); border-radius: 12px; cursor: pointer;">
-            <div class="more-icon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons-round">edit</span>
-            </div>
-            <div class="more-content" style="flex: 1;">
-              <div class="more-title" style="font-weight: 600;">Edit Profile</div>
-              <div class="more-subtitle" style="font-size: 12px; color: var(--outline);">Update your information</div>
-            </div>
-          </div>
-          
-          <div class="more-item" onclick="showNotificationsSettings()" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface-container); border-radius: 12px; cursor: pointer;">
-            <div class="more-icon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons-round">notifications</span>
-            </div>
-            <div class="more-content" style="flex: 1;">
-              <div class="more-title" style="font-weight: 600;">Notifications</div>
-              <div class="more-subtitle" style="font-size: 12px; color: var(--outline);">Manage preferences</div>
-            </div>
-          </div>
-          
-          <div class="more-item" onclick="showPrivacySettings()" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface-container); border-radius: 12px; cursor: pointer;">
-            <div class="more-icon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons-round">security</span>
-            </div>
-            <div class="more-content" style="flex: 1;">
-              <div class="more-title" style="font-weight: 600;">Privacy & Security</div>
-              <div class="more-subtitle" style="font-size: 12px; color: var(--outline);">Manage settings</div>
-            </div>
-          </div>
-          
-          <div class="more-item" onclick="showHelp()" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface-container); border-radius: 12px; cursor: pointer;">
-            <div class="more-icon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons-round">help</span>
-            </div>
-            <div class="more-content" style="flex: 1;">
-              <div class="more-title" style="font-weight: 600;">Help & Support</div>
-              <div class="more-subtitle" style="font-size: 12px; color: var(--outline);">FAQs and support</div>
-            </div>
-          </div>
-          
-          <div class="more-item" onclick="clearCache()" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface-container); border-radius: 12px; cursor: pointer;">
-            <div class="more-icon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons-round">delete</span>
-            </div>
-            <div class="more-content" style="flex: 1;">
-              <div class="more-title" style="font-weight: 600;">Clear Cache</div>
-              <div class="more-subtitle" style="font-size: 12px; color: var(--outline);">Free up space</div>
-            </div>
-          </div>
-          
-          <div class="more-item" onclick="showAbout()" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface-container); border-radius: 12px; cursor: pointer;">
-            <div class="more-icon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons-round">info</span>
-            </div>
-            <div class="more-content" style="flex: 1;">
-              <div class="more-title" style="font-weight: 600;">About</div>
-              <div class="more-subtitle" style="font-size: 12px; color: var(--outline);">Version 1.0.0</div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Storage Info</h3>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--outline);">
-              <span style="color: var(--outline);">Offline Activities</span>
-              <span style="font-weight: 500;">${appState.offlineActivities.length}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--outline);">
-              <span style="color: var(--outline);">Recent Reports</span>
-              <span style="font-weight: 500;">${appState.recentReports.length}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-              <span style="color: var(--outline);">Storage Used</span>
-              <span style="font-weight: 500;">${(JSON.stringify(localStorage).length / 1024).toFixed(2)} KB</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-    
-    // ==================== FILTER ACTIVITIES ====================
+    // Filter activities
     async function filterActivities(filter) {
-      document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+      document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.classList.remove('active');
+      });
       event.target.classList.add('active');
       
       document.getElementById('loading').style.display = 'flex';
@@ -1065,7 +806,247 @@
       }
     }
     
-    // ==================== REPORT FUNCTIONS ====================
+// Load Reports - Updated to match image design
+function loadReports() {
+  return `
+    <!-- Report Types - Updated to match image -->
+    <div class="report-types">
+      <div class="report-type-card ${appState.reportType === 'weekly' ? 'selected' : ''}" onclick="selectReportType('weekly')">
+        <div class="report-icon">
+          <span class="material-icons-round">calendar_month</span>
+        </div>
+        <div class="report-text">
+          <div class="report-title">Weekly Timesheet</div>
+          <div class="report-desc">Last 7 days summary</div>
+        </div>
+      </div>
+      
+      <div class="report-type-card ${appState.reportType === 'monthly' ? 'selected' : ''}" onclick="selectReportType('monthly')">
+        <div class="report-icon">
+          <span class="material-icons-round">calendar_today</span>
+        </div>
+        <div class="report-text">
+          <div class="report-title">Monthly Report</div>
+          <div class="report-desc">Complete month summary</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Report Form -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <span class="material-icons-round">settings</span>
+          Report Configuration
+        </h3>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label required">Date Range</label>
+        <div class="date-range">
+          <div>
+            <label style="font-size: 12px; color: var(--outline);">Start Date</label>
+            <input type="date" class="form-input" id="startDate" required>
+          </div>
+          <div>
+            <label style="font-size: 12px; color: var(--outline);">End Date</label>
+            <input type="date" class="form-input" id="endDate" required>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label required">Format</label>
+        <div class="format-options">
+          <div class="format-option ${appState.format === 'pdf' ? 'selected' : ''}" onclick="selectFormat('pdf')">
+            <div class="format-icon">
+              <i class="fas fa-file-pdf"></i>
+            </div>
+            <div class="format-name">PDF</div>
+          </div>
+          
+          <div class="format-option ${appState.format === 'excel' ? 'selected' : ''}" onclick="selectFormat('excel')">
+            <div class="format-icon">
+              <i class="fas fa-file-excel"></i>
+            </div>
+            <div class="format-name">Excel</div>
+          </div>
+          
+          <div class="format-option ${appState.format === 'csv' ? 'selected' : ''}" onclick="selectFormat('csv')">
+            <div class="format-icon">
+              <i class="fas fa-file-csv"></i>
+            </div>
+            <div class="format-name">CSV</div>
+          </div>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
+        <button class="btn btn-secondary btn-full" onclick="previewReport()">
+          <span class="material-icons-round">visibility</span>
+          Preview
+        </button>
+        <button class="btn btn-primary btn-full" onclick="generateReport()">
+          <span class="material-icons-round">download</span>
+          Download
+        </button>
+      </div>
+    </div>
+    
+    <!-- Report Preview -->
+    <div class="report-preview" id="reportPreview" style="display: none;">
+      <div class="preview-header">
+        <h3>Report Preview</h3>
+        <button class="action-btn" onclick="closePreview()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="preview-content" id="previewContent"></div>
+    </div>
+    
+    <!-- Recent Reports -->
+    <div class="recent-reports">
+      <div class="card-header">
+        <h3 class="card-title">
+          <span class="material-icons-round">history</span>
+          Recent Reports
+        </h3>
+      </div>
+      
+      <div class="reports-list" id="recentReportsList">
+        ${renderRecentReports()}
+      </div>
+    </div>
+  `;
+}    
+    // Load More
+    function loadMore() {
+      return `
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span class="material-icons-round">person</span>
+              Profile
+            </h3>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-md);">
+            <div class="member-avatar" style="width: 64px; height: 64px; font-size: 24px; background: var(--primary);">
+              ${getInitials(appState.currentUser?.name)}
+            </div>
+            <div>
+              <h4>${escapeHtml(appState.currentUser?.name || 'User')}</h4>
+              <div style="color: var(--outline);">${escapeHtml(appState.currentUser?.staffId || '')}</div>
+              <div style="color: var(--outline);">${escapeHtml(appState.currentUser?.designation || '')}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="more-menu">
+          <div class="more-item" onclick="showProfile()">
+            <div class="more-icon"><span class="material-icons-round">edit</span></div>
+            <div class="more-content">
+              <div class="more-title">Edit Profile</div>
+              <div class="more-subtitle">Update your information</div>
+            </div>
+          </div>
+          
+          <div class="more-item" onclick="showNotificationsSettings()">
+            <div class="more-icon"><span class="material-icons-round">notifications</span></div>
+            <div class="more-content">
+              <div class="more-title">Notifications</div>
+              <div class="more-subtitle">Manage preferences</div>
+            </div>
+          </div>
+          
+          <div class="more-item" onclick="showPrivacySettings()">
+            <div class="more-icon"><span class="material-icons-round">security</span></div>
+            <div class="more-content">
+              <div class="more-title">Privacy & Security</div>
+              <div class="more-subtitle">Manage settings</div>
+            </div>
+          </div>
+          
+          <div class="more-item" onclick="showHelp()">
+            <div class="more-icon"><span class="material-icons-round">help</span></div>
+            <div class="more-content">
+              <div class="more-title">Help & Support</div>
+              <div class="more-subtitle">FAQs and support</div>
+            </div>
+          </div>
+          
+          <div class="more-item" onclick="clearCache()">
+            <div class="more-icon"><span class="material-icons-round">delete</span></div>
+            <div class="more-content">
+              <div class="more-title">Clear Cache</div>
+              <div class="more-subtitle">Free up space</div>
+            </div>
+          </div>
+          
+          <div class="more-item" onclick="showAbout()">
+            <div class="more-icon"><span class="material-icons-round">info</span></div>
+            <div class="more-content">
+              <div class="more-title">About</div>
+              <div class="more-subtitle">Version 1.0.0</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Storage Info</h3>
+          </div>
+          <div class="info-grid">
+            <div class="info-row">
+              <span class="info-label">Offline Activities</span>
+              <span class="info-value">${appState.offlineActivities.length}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Recent Reports</span>
+              <span class="info-value">${appState.recentReports.length}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Storage Used</span>
+              <span class="info-value">${(JSON.stringify(localStorage).length / 1024).toFixed(2)} KB</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Render recent reports
+    function renderRecentReports() {
+      if (!appState.recentReports || appState.recentReports.length === 0) {
+        return `<div style="text-align: center; padding: 20px; color: var(--outline);">No recent reports</div>`;
+      }
+      
+      return appState.recentReports.slice(0, 5).map((report, index) => {
+        const icon = report.format === 'pdf' ? 'file-pdf' : 
+                    report.format === 'excel' ? 'file-excel' : 'file-csv';
+        
+        return `
+          <div class="report-item">
+            <div class="report-item-icon"><i class="fas fa-${icon}"></i></div>
+            <div class="report-item-info">
+              <div class="report-item-name">${report.name || 'Report'}</div>
+              <div class="report-item-details">
+                <span>${report.type || 'Report'}</span>
+                <span>${report.date || ''}</span>
+              </div>
+            </div>
+            <div class="report-item-actions">
+              <button class="action-btn" onclick="downloadRecentReport(${index})">
+                <i class="fas fa-download"></i>
+              </button>
+              <button class="action-btn" onclick="deleteRecentReport(${index})">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // Report Functions
     function selectReportType(type) {
       appState.reportType = type;
       document.querySelectorAll('.report-type-card').forEach(c => c.classList.remove('selected'));
@@ -1100,8 +1081,8 @@
     }
     
     async function previewReport() {
-      const startDate = document.getElementById('startDate')?.value;
-      const endDate = document.getElementById('endDate')?.value;
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
       
       if (!startDate || !endDate) {
         showToast('Select dates', 'error');
@@ -1128,25 +1109,19 @@
             previewContent.innerHTML = '<div style="text-align: center; padding: 20px;">No activities found</div>';
           } else {
             previewContent.innerHTML = `
-              <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                  <tr style="background: var(--primary-light);">
-                    <th style="padding: 8px; text-align: left;">Date</th>
-                    <th style="padding: 8px; text-align: left;">Description</th>
-                    <th style="padding: 8px; text-align: left;">Status</th>
-                  </tr>
-                </thead>
+              <table class="preview-table">
+                <thead><tr><th>Date</th><th>Description</th><th>Status</th></tr></thead>
                 <tbody>
                   ${filtered.slice(0, 10).map(a => `
-                    <tr style="border-bottom: 1px solid var(--outline);">
-                      <td style="padding: 8px;">${a.date}</td>
-                      <td style="padding: 8px;">${escapeHtml(a.description).substring(0, 30)}${a.description?.length > 30 ? '...' : ''}</td>
-                      <td style="padding: 8px;">${a.status}</td>
+                    <tr>
+                      <td>${a.date}</td>
+                      <td>${escapeHtml(a.description).substring(0, 30)}</td>
+                      <td>${a.status}</td>
                     </tr>
                   `).join('')}
                 </tbody>
               </table>
-              ${filtered.length > 10 ? `<div style="margin-top: 8px; color: var(--outline);">... and ${filtered.length - 10} more</div>` : ''}
+              ${filtered.length > 10 ? `<div style="margin-top: 8px;">... and ${filtered.length - 10} more</div>` : ''}
             `;
           }
           
@@ -1164,8 +1139,8 @@
     }
     
     async function generateReport() {
-      const startDate = document.getElementById('startDate')?.value;
-      const endDate = document.getElementById('endDate')?.value;
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
       
       if (!startDate || !endDate) {
         showToast('Select dates', 'error');
@@ -1186,7 +1161,7 @@
         if (result.success) {
           const report = {
             id: Date.now(),
-            name: `${appState.reportType === 'weekly' ? 'Weekly' : 'Monthly'} Report`,
+            name: `${appState.reportType} Report`,
             type: appState.reportType,
             format: appState.format,
             date: new Date().toLocaleDateString()
@@ -1219,14 +1194,25 @@
       }
     }
     
-    // ==================== MORE FUNCTIONS ====================
+    // More functions
     function showProfile() { showToast('Profile settings', 'info'); }
     function showNotificationsSettings() { showToast('Notifications settings', 'info'); }
     function showPrivacySettings() { showToast('Privacy settings', 'info'); }
     function showHelp() { window.open('mailto:support@trackmaster.com'); }
     function showAbout() { showToast('TrackMaster v1.0.0', 'info'); }
     
-    // ==================== HELPER FUNCTIONS ====================
+    function clearCache() {
+      if (confirm('Clear cache?')) {
+        pageCache.clear();
+        API.cache?.clear();
+        appState.offlineActivities = [];
+        localStorage.removeItem('offlineActivities');
+        showToast('Cache cleared', 'success');
+        loadPageContent('more');
+      }
+    }
+    
+    // Helper functions
     function getInitials(name) {
       if (!name) return 'U';
       return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -1257,7 +1243,6 @@
       showToast('No new notifications', 'info');
     }
     
-    // ==================== INSTALL PROMPT ====================
     function checkInstallPrompt() {
       if (appState.deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
         document.getElementById('installPrompt').style.display = 'block';
@@ -1277,7 +1262,6 @@
       localStorage.setItem('installPromptDismissed', Date.now());
     }
     
-    // ==================== SYNC OFFLINE ====================
     async function syncOfflineActivities() {
       if (appState.offlineActivities.length > 0) {
         for (const activity of appState.offlineActivities) {
@@ -1289,7 +1273,6 @@
       }
     }
     
-    // ==================== UTILITY FUNCTIONS ====================
     function showLoading(text) {
       document.getElementById('loadingText').textContent = text || 'Loading...';
       document.getElementById('loading').style.display = 'flex';
@@ -1301,7 +1284,7 @@
     
     function refreshData() {
       pageCache.clear();
-      if (API.cache) API.cache.clear();
+      API.cache?.clear();
       loadPageContent(appState.currentPage);
       showToast('Refreshed', 'success');
     }
@@ -1320,89 +1303,6 @@
       toast.textContent = message;
       document.getElementById('toastContainer').appendChild(toast);
       setTimeout(() => toast.remove(), 3000);
-    }
-    
-    function clearCache() {
-      if (confirm('Clear cache?')) {
-        pageCache.clear();
-        if (API.cache) API.cache.clear();
-        appState.offlineActivities = [];
-        localStorage.removeItem('offlineActivities');
-        showToast('Cache cleared', 'success');
-        loadPageContent('more');
-      }
-    }
-    
-    // ==================== INITIALIZE ====================
-    function checkAuth() {
-      const savedUser = localStorage.getItem('trackmaster_user');
-      const sessionUser = sessionStorage.getItem('trackmaster_session');
-      
-      if (savedUser) {
-        try {
-          const userData = JSON.parse(savedUser);
-          if (Date.now() < (userData.expiry || 0)) {
-            appState.currentUser = userData;
-            return true;
-          }
-        } catch (e) {}
-      } else if (sessionUser) {
-        try {
-          appState.currentUser = JSON.parse(sessionUser);
-          return true;
-        } catch (e) {}
-      }
-      
-      window.location.href = 'login.html';
-      return false;
-    }
-    
-    function setupEventListeners() {
-      window.addEventListener('online', () => {
-        appState.isOnline = true;
-        document.getElementById('offlineIndicator').style.display = 'none';
-        showToast('You are back online!', 'success');
-        syncOfflineActivities();
-      });
-      
-      window.addEventListener('offline', () => {
-        appState.isOnline = false;
-        document.getElementById('offlineIndicator').style.display = 'flex';
-        showToast('You are offline', 'warning');
-      });
-      
-      window.addEventListener('popstate', (e) => {
-        const page = e.state?.page || 'home';
-        navigateTo(page, false);
-      });
-      
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        appState.deferredPrompt = e;
-      });
-    }
-    
-    function registerServiceWorker() {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(err => {
-          console.log('ServiceWorker registration failed:', err);
-        });
-      }
-    }
-    
-    async function initApp() {
-      if (!checkAuth()) return;
-      
-      setupEventListeners();
-      registerServiceWorker();
-      
-      const hash = window.location.hash.substring(1);
-      const initialPage = hash || 'home';
-      
-      updateActiveNav(initialPage);
-      await navigateTo(initialPage, false);
-      
-      setTimeout(checkInstallPrompt, 3000);
     }
     
     window.onload = initApp;
