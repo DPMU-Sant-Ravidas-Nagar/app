@@ -15,20 +15,32 @@ const API = {
       const script = document.createElement('script');
       script.src = url + '&callback=' + callbackName;
       
+      // Set a timeout
+      const timeout = setTimeout(() => {
+        cleanup();
+        reject(new Error('Request timeout'));
+      }, 30000); // 30 second timeout
+      
+      // Cleanup function
+      const cleanup = () => {
+        clearTimeout(timeout);
+        if (window[callbackName]) {
+          delete window[callbackName];
+        }
+        if (script.parentNode) {
+          document.body.removeChild(script);
+        }
+      };
+      
       // Define callback function globally
       window[callbackName] = (data) => {
-        // Clean up
-        delete window[callbackName];
-        document.body.removeChild(script);
-        
-        // Resolve with data
+        cleanup();
         resolve(data);
       };
       
       // Handle errors
       script.onerror = (error) => {
-        delete window[callbackName];
-        document.body.removeChild(script);
+        cleanup();
         reject(new Error('JSONP request failed'));
       };
       
@@ -61,7 +73,7 @@ const API = {
       return data;
     } catch (error) {
       console.error('API Error:', error);
-      return { success: false, message: 'Network error. Please check your connection.' };
+      return { success: false, message: 'Network error: ' + error.message };
     }
   },
   
