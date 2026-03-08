@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#6750A4">
+  
+  <!-- Preconnect for faster loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://script.google.com">
+  
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -12,7 +17,7 @@
   
   <style>
     .container {
-      height: calc(100vh - 64px - var(--safe-top));
+      height: calc(100vh - 64px);
       overflow-y: auto;
       padding: var(--spacing-lg);
       padding-bottom: calc(var(--spacing-lg) + var(--safe-bottom));
@@ -41,16 +46,18 @@
       position: relative;
       overflow: hidden;
       background: var(--surface-container);
+      transition: all 0.3s ease;
+    }
+    
+    .image-upload-item:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
     }
     
     .image-upload-item.add {
       color: var(--outline);
       flex-direction: column;
       gap: var(--spacing-sm);
-    }
-    
-    .image-upload-item.add:active {
-      background: var(--surface);
     }
     
     .image-preview {
@@ -65,69 +72,20 @@
       right: 4px;
       width: 24px;
       height: 24px;
-      border-radius: var(--radius-full);
-      background: rgba(0, 0, 0, 0.5);
+      border-radius: 50%;
+      background: rgba(0,0,0,0.5);
       color: white;
       border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       cursor: pointer;
-    }
-    
-    .camera-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: black;
-      z-index: 1000;
-      display: none;
-    }
-    
-    .camera-preview {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .camera-controls {
-      position: absolute;
-      bottom: calc(var(--safe-bottom) + var(--spacing-xl));
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: var(--spacing-xl);
-    }
-    
-    .camera-btn {
-      width: 64px;
-      height: 64px;
-      border-radius: var(--radius-full);
-      border: 4px solid white;
-      background: transparent;
-      cursor: pointer;
-    }
-    
-    .camera-btn.capture {
-      background: white;
-    }
-    
-    .camera-btn.close {
-      position: absolute;
-      top: calc(var(--safe-top) + var(--spacing-lg));
-      right: var(--spacing-lg);
-      width: 48px;
-      height: 48px;
-      border: none;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .image-remove:hover {
+      background: rgba(0,0,0,0.7);
+      transform: scale(1.1);
     }
     
     .location-section {
@@ -142,42 +100,24 @@
       padding: var(--spacing-md);
       background: var(--surface-container);
       border-radius: var(--radius-sm);
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
     .location-text {
       flex: 1;
       font-size: 14px;
       color: var(--outline);
-    }
-    
-    .counter-section {
-      margin-bottom: var(--spacing-xl);
-    }
-    
-    .counter-controls {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-lg);
-      margin-top: var(--spacing-md);
-    }
-    
-    .counter-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: var(--radius-full);
-      border: 2px solid var(--primary);
-      background: transparent;
-      color: var(--primary);
-      font-size: 24px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    
-    .counter-value {
-      font-size: 24px;
-      font-weight: 600;
-      min-width: 60px;
-      text-align: center;
     }
     
     .team-selection {
@@ -195,11 +135,23 @@
       background: var(--primary-light);
       color: var(--primary);
       padding: var(--spacing-sm) var(--spacing-md);
-      border-radius: var(--radius-full);
+      border-radius: 20px;
       font-size: 12px;
       display: flex;
       align-items: center;
-      gap: var(--spacing-xs);
+      gap: 4px;
+      animation: popIn 0.3s ease;
+    }
+    
+    @keyframes popIn {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
     
     .modal {
@@ -208,11 +160,17 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0,0,0,0.5);
       z-index: 2000;
       display: flex;
       align-items: center;
       justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     
     .modal-content {
@@ -223,6 +181,7 @@
       max-height: 80vh;
       display: flex;
       flex-direction: column;
+      animation: slideUp 0.3s ease;
     }
     
     .modal-header {
@@ -252,6 +211,7 @@
       padding: var(--spacing-md);
       border-bottom: 1px solid var(--outline);
       cursor: pointer;
+      transition: background 0.2s;
     }
     
     .team-checkbox-item:hover {
@@ -261,12 +221,21 @@
     .team-checkbox-item input[type="checkbox"] {
       width: 20px;
       height: 20px;
+      cursor: pointer;
     }
     
     .button-group {
       display: flex;
       gap: var(--spacing-md);
       margin-top: var(--spacing-xl);
+    }
+    
+    .btn {
+      transition: all 0.3s ease;
+    }
+    
+    .btn:active {
+      transform: scale(0.98);
     }
     
     @media (prefers-color-scheme: dark) {
@@ -285,80 +254,25 @@
     </button>
   </div>
   
-  <!-- Main Form -->
+  <!-- Main Container -->
   <div class="container">
     <div class="form-card card">
+      <!-- Date of Activity -->
       <div class="form-group">
         <label class="form-label required">Date of Activity</label>
         <input type="date" class="form-input" id="activityDate" required>
       </div>
       
-      <div class="form-group">
-        <label class="form-label required">Activity Type</label>
-        <select class="form-input" id="activityType" required>
-          <option value="">Select activity type</option>
-          <option value="FHTC Feeding">FHTC Feeding</option>
-          <option value="Verification">Verification</option>
-          <option value="Meeting">Meeting</option>
-          <option value="Field Work">Field Work</option>
-          <option value="Reporting">Reporting</option>
-          <option value="Training">Training</option>
-          <option value="Holiday">Holiday</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">Block Name</label>
-        <input type="text" class="form-input" id="blockName" placeholder="Enter block name">
-      </div>
-      
+      <!-- Description of Activity -->
       <div class="form-group">
         <label class="form-label required">Description of Activity</label>
-        <textarea class="form-input" id="description" placeholder="Describe your activity..." rows="3" required></textarea>
+        <textarea class="form-input" id="description" placeholder="Describe your activity in detail..." rows="4" required></textarea>
+        <small style="color: var(--outline);">Minimum 10 characters</small>
       </div>
       
-      <!-- Team Members Selection -->
-      <div class="form-group">
-        <label class="form-label">Activity Team Members</label>
-        <div class="team-selection">
-          <button class="btn btn-secondary" onclick="showTeamSelector()" type="button" style="width: 100%;">
-            <span class="material-icons-round">group_add</span>
-            Select Team Members
-          </button>
-        </div>
-        <div class="selected-team" id="selectedTeam" style="display: none;"></div>
-      </div>
-      
-      <!-- FHTC Counter -->
-      <div class="counter-section" id="fhtcSection" style="display: none;">
-        <label class="form-label">FHTC Feeding Count</label>
-        <div class="counter-controls">
-          <button class="counter-btn" onclick="updateCount(-1)">-</button>
-          <span class="counter-value" id="countValue">0</span>
-          <button class="counter-btn" onclick="updateCount(1)">+</button>
-        </div>
-      </div>
-      
-      <!-- Location -->
-      <div class="location-section">
-        <label class="form-label">Location</label>
-        <button class="btn btn-secondary" onclick="getLocation()" type="button" style="width: 100%; margin-top: var(--spacing-md);">
-          <span class="material-icons-round">location_on</span>
-          Get Current Location
-        </button>
-        <div class="location-info" id="locationInfo" style="display: none;">
-          <span class="material-icons-round" style="color: var(--primary);">location_on</span>
-          <div class="location-text" id="locationText"></div>
-          <button class="icon-button" onclick="clearLocation()">
-            <span class="material-icons-round">close</span>
-          </button>
-        </div>
-      </div>
-      
-      <!-- Images -->
+      <!-- Activity Images -->
       <div class="image-upload-section">
-        <label class="form-label">Activity Images</label>
+        <label class="form-label">Activity Images (Max 6)</label>
         <div class="image-upload-grid" id="imageGrid">
           <div class="image-upload-item add" onclick="openImageSource()">
             <span class="material-icons-round">add_photo_alternate</span>
@@ -367,16 +281,43 @@
         </div>
       </div>
       
+      <!-- Location -->
+      <div class="location-section">
+        <label class="form-label">Location</label>
+        <button class="btn btn-secondary" onclick="getLocation()" type="button" style="width: 100%;">
+          <span class="material-icons-round">location_on</span>
+          Get Current Location
+        </button>
+        <div class="location-info" id="locationInfo" style="display: none;">
+          <span class="material-icons-round" style="color: var(--primary);">location_on</span>
+          <div class="location-text" id="locationText"></div>
+          <button class="icon-button" onclick="clearLocation()" title="Remove location">
+            <span class="material-icons-round">close</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Activity Team Member -->
       <div class="form-group">
-        <label class="form-label">Activity By</label>
-        <input type="text" class="form-input" id="activityBy" readonly>
+        <label class="form-label">Activity Team Member</label>
+        <div class="team-selection">
+          <button class="btn btn-secondary" onclick="showTeamSelector()" type="button" style="width: 100%;">
+            <span class="material-icons-round">group_add</span>
+            Select Team Members
+          </button>
+        </div>
+        <div class="selected-team" id="selectedTeam"></div>
+      </div>
+      
+      <!-- Submitted By (readonly) -->
+      <div class="form-group">
+        <label class="form-label">Submitted By</label>
+        <input type="text" class="form-input" id="submittedByName" readonly>
       </div>
       
       <!-- Action Buttons -->
       <div class="button-group">
-        <button class="btn btn-secondary btn-full" onclick="cancelActivity()">
-          Cancel
-        </button>
+        <button class="btn btn-secondary btn-full" onclick="cancelActivity()">Cancel</button>
         <button class="btn btn-primary btn-full" onclick="saveActivity()">
           <span class="material-icons-round">save</span>
           Save Activity
@@ -385,39 +326,10 @@
     </div>
   </div>
   
-  <!-- Camera Modal -->
-  <div class="camera-modal" id="cameraModal">
-    <video class="camera-preview" id="cameraPreview" autoplay playsinline></video>
-    <button class="camera-btn close" onclick="closeCamera()">
-      <span class="material-icons-round">close</span>
-    </button>
-    <div class="camera-controls">
-      <button class="camera-btn capture" onclick="capturePhoto()"></button>
-    </div>
-  </div>
-  
-  <!-- Team Selection Modal -->
-  <div class="modal" id="teamModal" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Select Team Members</h3>
-        <button class="icon-button" onclick="closeTeamModal()">
-          <span class="material-icons-round">close</span>
-        </button>
-      </div>
-      <div class="modal-body" id="teamList">
-        <div style="text-align: center; padding: 20px;">Loading team members...</div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" onclick="confirmTeamSelection()">Done</button>
-      </div>
-    </div>
-  </div>
-  
   <!-- Loading Overlay -->
   <div class="loading-overlay" id="loading">
     <div class="spinner"></div>
-    <div>Saving activity...</div>
+    <div id="loadingText">Saving activity...</div>
   </div>
   
   <!-- Toast Container -->
@@ -427,13 +339,11 @@
     // App State
     const state = {
       images: [],
-      fhtcCount: 0,
       location: null,
-      isOnline: navigator.onLine,
-      stream: null,
       currentUser: null,
       selectedTeamMembers: [],
-      allTeamMembers: []
+      allTeamMembers: [],
+      editId: null
     };
     
     // Initialize
@@ -445,8 +355,7 @@
       if (savedUser) {
         try {
           const userData = JSON.parse(savedUser);
-          const expiryTime = userData.expiry || 0;
-          if (Date.now() < expiryTime) {
+          if (Date.now() < (userData.expiry || 0)) {
             state.currentUser = userData;
           }
         } catch (e) {}
@@ -465,37 +374,19 @@
       state.selectedTeamMembers = [state.currentUser.staffId];
       
       // Set current date
-      const today = new Date();
-      const formattedDate = today.toISOString().split('T')[0];
-      document.getElementById('activityDate').value = formattedDate;
-      document.getElementById('activityBy').value = state.currentUser.name || 'Current User';
+      document.getElementById('activityDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('submittedByName').value = state.currentUser.name;
       
-      // Load team members for selection
+      // Load team members
       await loadTeamMembers();
       
       // Check if editing existing activity
       const urlParams = new URLSearchParams(window.location.search);
-      const editId = urlParams.get('edit');
-      if (editId) {
-        await loadActivityForEdit(editId);
+      state.editId = urlParams.get('edit');
+      if (state.editId) {
+        await loadActivityForEdit(state.editId);
+        document.querySelector('.app-title').textContent = 'Edit Activity';
       }
-      
-      // Listen for FHTC selection
-      document.getElementById('activityType').addEventListener('change', function() {
-        const fhtcSection = document.getElementById('fhtcSection');
-        fhtcSection.style.display = this.value === 'FHTC Feeding' ? 'block' : 'none';
-      });
-      
-      // Network status
-      window.addEventListener('online', () => {
-        state.isOnline = true;
-        showToast('You are back online!', 'success');
-      });
-      
-      window.addEventListener('offline', () => {
-        state.isOnline = false;
-        showToast('You are offline. Activity will be saved when online.', 'warning');
-      });
     }
     
     // Load team members
@@ -510,129 +401,136 @@
       }
     }
     
-    // Show team selector
+    // Load activity for editing
+    async function loadActivityForEdit(rowId) {
+      try {
+        const result = await API.getUserActivities(state.currentUser.staffId, 'all');
+        if (result.success) {
+          const activity = result.activities.find(a => a.rowId === rowId);
+          if (activity) {
+            document.getElementById('activityDate').value = activity.date;
+            document.getElementById('description').value = activity.description;
+            
+            if (activity.location) {
+              state.location = activity.location;
+              document.getElementById('locationText').textContent = activity.location;
+              document.getElementById('locationInfo').style.display = 'flex';
+            }
+            
+            if (activity.images && activity.images.length > 0) {
+              state.images = activity.images;
+              renderImageGrid();
+            }
+            
+            if (activity.teamMembers && activity.teamMembers.length > 0) {
+              state.selectedTeamMembers = activity.teamMembers;
+              updateSelectedTeamDisplay();
+            }
+          }
+        }
+      } catch (error) {
+        showToast('Error loading activity', 'error');
+      }
+    }
+    
+    // Show team selector modal
     function showTeamSelector() {
-      const modal = document.getElementById('teamModal');
-      const teamList = document.getElementById('teamList');
+      if (state.allTeamMembers.length === 0) {
+        showToast('No team members available', 'warning');
+        return;
+      }
       
-      if (state.allTeamMembers.length > 0) {
-        teamList.innerHTML = state.allTeamMembers.map(member => `
+      // Create modal
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.id = 'teamModal';
+      
+      let membersHtml = '';
+      state.allTeamMembers.forEach(member => {
+        membersHtml += `
           <div class="team-checkbox-item" onclick="toggleMember('${member.staffId}')">
             <input type="checkbox" 
                    id="member_${member.staffId}" 
                    value="${member.staffId}"
                    ${state.selectedTeamMembers.includes(member.staffId) ? 'checked' : ''}>
             <label for="member_${member.staffId}">
-              <strong>${member.name}</strong><br>
-              <small>${member.designation || 'Team Member'}</small>
+              <strong>${escapeHtml(member.name)}</strong><br>
+              <small>${escapeHtml(member.designation || 'Team Member')}</small>
             </label>
           </div>
-        `).join('');
-      }
+        `;
+      });
       
-      modal.style.display = 'flex';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Select Team Members</h3>
+            <button class="icon-button" onclick="closeTeamModal()">
+              <span class="material-icons-round">close</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            ${membersHtml}
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" onclick="confirmTeamSelection()">Done</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
     }
     
     // Toggle member selection
     function toggleMember(staffId) {
       const checkbox = document.getElementById(`member_${staffId}`);
-      checkbox.checked = !checkbox.checked;
-    }
-    
-    // Confirm team selection
-    function confirmTeamSelection() {
-      const checkboxes = document.querySelectorAll('#teamList input[type="checkbox"]:checked');
-      state.selectedTeamMembers = Array.from(checkboxes).map(cb => cb.value);
-      
-      // Update display
-      const selectedTeamDiv = document.getElementById('selectedTeam');
-      if (state.selectedTeamMembers.length > 1) {
-        const selectedNames = state.allTeamMembers
-          .filter(m => state.selectedTeamMembers.includes(m.staffId))
-          .map(m => m.name.split(' ')[0]);
-        
-        selectedTeamDiv.innerHTML = selectedNames.map(name => `
-          <span class="team-chip">
-            ${name}
-          </span>
-        `).join('');
-        selectedTeamDiv.style.display = 'flex';
-      } else {
-        selectedTeamDiv.style.display = 'none';
+      if (checkbox) {
+        checkbox.checked = !checkbox.checked;
       }
-      
-      closeTeamModal();
     }
     
     // Close team modal
     function closeTeamModal() {
-      document.getElementById('teamModal').style.display = 'none';
+      const modal = document.getElementById('teamModal');
+      if (modal) modal.remove();
     }
     
-    // Update counter
-    function updateCount(delta) {
-      state.fhtcCount = Math.max(0, state.fhtcCount + delta);
-      document.getElementById('countValue').textContent = state.fhtcCount;
+    // Confirm team selection
+    function confirmTeamSelection() {
+      const checkboxes = document.querySelectorAll('#teamModal input[type="checkbox"]:checked');
+      state.selectedTeamMembers = Array.from(checkboxes).map(cb => cb.value);
+      
+      updateSelectedTeamDisplay();
+      closeTeamModal();
     }
     
-    // Image handling
+    // Update selected team display
+    function updateSelectedTeamDisplay() {
+      const selectedDiv = document.getElementById('selectedTeam');
+      
+      if (state.selectedTeamMembers.length > 0) {
+        const selectedNames = state.allTeamMembers
+          .filter(m => state.selectedTeamMembers.includes(m.staffId))
+          .map(m => m.name);
+        
+        selectedDiv.innerHTML = selectedNames.map(name => `
+          <span class="team-chip">
+            <span class="material-icons-round" style="font-size: 16px;">person</span>
+            ${escapeHtml(name)}
+          </span>
+        `).join('');
+      } else {
+        selectedDiv.innerHTML = '';
+      }
+    }
+    
+    // Open image source
     function openImageSource() {
       if (state.images.length >= 6) {
         showToast('Maximum 6 images allowed', 'warning');
         return;
       }
       
-      if (confirm('Take photo or choose from gallery?')) {
-        openCamera();
-      } else {
-        selectFromGallery();
-      }
-    }
-    
-    function openCamera() {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showToast('Camera not supported', 'error');
-        return;
-      }
-      
-      document.getElementById('cameraModal').style.display = 'block';
-      
-      navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' }, 
-        audio: false 
-      })
-      .then(stream => {
-        state.stream = stream;
-        document.getElementById('cameraPreview').srcObject = stream;
-      })
-      .catch(err => {
-        showToast('Could not access camera', 'error');
-        closeCamera();
-      });
-    }
-    
-    function closeCamera() {
-      if (state.stream) {
-        state.stream.getTracks().forEach(track => track.stop());
-        state.stream = null;
-      }
-      document.getElementById('cameraModal').style.display = 'none';
-    }
-    
-    function capturePhoto() {
-      const video = document.getElementById('cameraPreview');
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      canvas.getContext('2d').drawImage(video, 0, 0);
-      const imageData = canvas.toDataURL('image/jpeg');
-      
-      addImage(imageData);
-      closeCamera();
-    }
-    
-    function selectFromGallery() {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
@@ -654,21 +552,20 @@
       input.click();
     }
     
+    // Add image
     function addImage(imageData) {
-      if (state.images.length >= 6) {
-        showToast('Maximum 6 images allowed', 'warning');
-        return;
-      }
-      
+      if (state.images.length >= 6) return;
       state.images.push(imageData);
       renderImageGrid();
     }
     
+    // Remove image
     function removeImage(index) {
       state.images.splice(index, 1);
       renderImageGrid();
     }
     
+    // Render image grid
     function renderImageGrid() {
       const grid = document.getElementById('imageGrid');
       let html = '';
@@ -676,7 +573,7 @@
       state.images.forEach((img, index) => {
         html += `
           <div class="image-upload-item">
-            <img src="${img}" class="image-preview" alt="Preview">
+            <img src="${img}" class="image-preview" alt="Preview ${index + 1}">
             <button class="image-remove" onclick="removeImage(${index})">
               <span class="material-icons-round" style="font-size: 16px;">close</span>
             </button>
@@ -696,7 +593,7 @@
       grid.innerHTML = html;
     }
     
-    // Location handling
+    // Get location
     function getLocation() {
       if (!navigator.geolocation) {
         showToast('Geolocation not supported', 'error');
@@ -707,17 +604,29 @@
       
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          state.location = `${position.coords.latitude},${position.coords.longitude}`;
+          state.location = `${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`;
           document.getElementById('locationText').textContent = 
             `Lat: ${position.coords.latitude.toFixed(6)}, Lng: ${position.coords.longitude.toFixed(6)}`;
           document.getElementById('locationInfo').style.display = 'flex';
+          showToast('Location captured', 'success');
         },
         (error) => {
-          showToast('Could not get location', 'error');
+          let message = 'Could not get location';
+          if (error.code === 1) message = 'Location permission denied';
+          else if (error.code === 2) message = 'Location unavailable';
+          else if (error.code === 3) message = 'Location request timeout';
+          
+          showToast(message, 'error');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
         }
       );
     }
     
+    // Clear location
     function clearLocation() {
       state.location = null;
       document.getElementById('locationInfo').style.display = 'none';
@@ -727,54 +636,82 @@
     async function saveActivity() {
       // Validate form
       const date = document.getElementById('activityDate').value;
-      const type = document.getElementById('activityType').value;
-      const description = document.getElementById('description').value;
+      const description = document.getElementById('description').value.trim();
       
-      if (!date || !type || !description) {
-        showToast('Please fill all required fields', 'error');
+      if (!date) {
+        showToast('Please select date', 'error');
+        return;
+      }
+      
+      if (!description) {
+        showToast('Please enter description', 'error');
+        return;
+      }
+      
+      if (description.length < 10) {
+        showToast('Description must be at least 10 characters', 'error');
         return;
       }
       
       const activityData = {
+        rowId: state.editId,
         date: date,
-        type: type,
         description: description,
-        blockName: document.getElementById('blockName').value,
         images: state.images,
         location: state.location,
         teamMembers: state.selectedTeamMembers,
-        submittedBy: state.currentUser.staffId,
-        fhtcCount: type === 'FHTC Feeding' ? state.fhtcCount : 0
+        submittedBy: state.currentUser.staffId
       };
       
       document.getElementById('loading').style.display = 'flex';
       
       try {
-        const result = await API.saveActivity(activityData);
+        let result;
+        
+        if (state.editId) {
+          result = await API.updateActivity(state.editId, activityData);
+        } else {
+          result = await API.saveActivity(activityData);
+        }
+        
         document.getElementById('loading').style.display = 'none';
         
         if (result.success) {
-          if (result.pendingApprovals) {
-            showToast('Activity saved and sent for team approval', 'success');
-          } else {
-            showToast('Activity saved successfully!', 'success');
+          showToast(state.editId ? 'Activity updated!' : 'Activity saved!', 'success');
+          
+          // Clear cache
+          if (window.opener && window.opener.API) {
+            window.opener.API.cache.clear();
           }
           
           setTimeout(() => {
-            window.location.href = 'index.html';
+            window.location.href = 'index.html?refresh=true';
           }, 1500);
         } else {
           showToast(result.message || 'Error saving activity', 'error');
         }
       } catch (error) {
         document.getElementById('loading').style.display = 'none';
-        showToast('Error saving activity. Please try again.', 'error');
+        
+        // Save offline
+        if (!navigator.onLine) {
+          const offlineActivities = JSON.parse(localStorage.getItem('offlineActivities') || '[]');
+          offlineActivities.push(activityData);
+          localStorage.setItem('offlineActivities', JSON.stringify(offlineActivities));
+          showToast('Saved offline. Will sync when online.', 'warning');
+          
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 2000);
+        } else {
+          showToast('Error saving activity', 'error');
+        }
       }
     }
     
     // Cancel
     function cancelActivity() {
-      if (confirm('Are you sure you want to cancel? Unsaved changes will be lost.')) {
+      if (confirm('Discard changes?')) {
         window.location.href = 'index.html';
       }
     }
@@ -782,6 +719,17 @@
     // Go back
     function goBack() {
       cancelActivity();
+    }
+    
+    // Escape HTML
+    function escapeHtml(unsafe) {
+      if (!unsafe) return '';
+      return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
     
     // Show toast
@@ -792,7 +740,10 @@
       
       const container = document.getElementById('toastContainer');
       container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
     }
     
     // Initialize on load
