@@ -767,3 +767,86 @@ textarea.form-input {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* Additional styles for tabs */
+.nav-item {
+  cursor: pointer;
+}
+
+.nav-item.active {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding: 5px 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-chip {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: var(--surface-container);
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.filter-chip.active {
+  background: var(--primary);
+  color: white;
+}
+
+.filter-chip:active {
+  transform: scale(0.95);
+}
+
+.badge {
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Activity item hover effect */
+.activity-item {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.activity-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.activity-item.pending {
+  border-left-color: var(--warning);
+}
+
+/* Team member hover */
+.team-member {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.team-member:active {
+  transform: scale(0.98);
+}
+
+/* More item hover */
+.more-item {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.more-item:active {
+  background: var(--primary-light);
+}
