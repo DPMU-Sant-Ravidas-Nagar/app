@@ -1,7 +1,7 @@
 // api.js - Complete optimized version with caching and offline support
 const API = {
   // Base URL - REPLACE WITH YOUR ACTUAL URL
-  baseUrl: 'https://script.google.com/macros/s/AKfycbwipm9x7hgC31sRiBNPueBxBuO9ulgfXXibiYdnK7rBg8178VbZoj-s5PkW6BNvyM1-sA/exec',
+  baseUrl: 'https://script.google.com/macros/s/AKfycbyw8He4BHycpOLesRSvAS7Xi-hsJupM44JJRTDZdQzA9eR4XXFT_dzl6pTCyrex2C8UPA/exec',
   
   // Cache system
   cache: {
