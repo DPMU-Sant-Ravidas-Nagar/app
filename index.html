@@ -806,112 +806,119 @@
       }
     }
     
-    // Load Reports
-    function loadReports() {
-      return `
-        <div class="report-types">
-          <div class="report-type-card selected" onclick="selectReportType('weekly', this)">
-            <div class="report-icon">
-              <i class="fas fa-calendar-week"></i>
-            </div>
-            <div class="report-title">Weekly Timesheet</div>
-            <div class="report-desc">Last 7 days summary</div>
-          </div>
-          
-          <div class="report-type-card" onclick="selectReportType('monthly', this)">
-            <div class="report-icon">
-              <i class="fas fa-calendar-alt"></i>
-            </div>
-            <div class="report-title">Monthly Report</div>
-            <div class="report-desc">Complete month summary</div>
-          </div>
+// Load Reports - Updated to match image design
+function loadReports() {
+  return `
+    <!-- Report Types - Updated to match image -->
+    <div class="report-types">
+      <div class="report-type-card ${appState.reportType === 'weekly' ? 'selected' : ''}" onclick="selectReportType('weekly')">
+        <div class="report-icon">
+          <span class="material-icons-round">calendar_month</span>
         </div>
-        
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">
-              <span class="material-icons-round">settings</span>
-              Report Configuration
-            </h3>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label required">Date Range</label>
-            <div class="date-range">
-              <div>
-                <label style="font-size: 12px; color: var(--outline);">Start Date</label>
-                <input type="date" class="form-input" id="startDate" required>
-              </div>
-              <div>
-                <label style="font-size: 12px; color: var(--outline);">End Date</label>
-                <input type="date" class="form-input" id="endDate" required>
-              </div>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label required">Format</label>
-            <div class="format-options">
-              <div class="format-option ${appState.format === 'pdf' ? 'selected' : ''}" onclick="selectFormat('pdf')">
-                <div class="format-icon">
-                  <i class="fas fa-file-pdf"></i>
-                </div>
-                <div class="format-name">PDF</div>
-              </div>
-              
-              <div class="format-option ${appState.format === 'excel' ? 'selected' : ''}" onclick="selectFormat('excel')">
-                <div class="format-icon">
-                  <i class="fas fa-file-excel"></i>
-                </div>
-                <div class="format-name">Excel</div>
-              </div>
-              
-              <div class="format-option ${appState.format === 'csv' ? 'selected' : ''}" onclick="selectFormat('csv')">
-                <div class="format-icon">
-                  <i class="fas fa-file-csv"></i>
-                </div>
-                <div class="format-name">CSV</div>
-              </div>
-            </div>
-          </div>
-          
-          <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
-            <button class="btn btn-secondary btn-full" onclick="previewReport()">
-              <span class="material-icons-round">visibility</span>
-              Preview
-            </button>
-            <button class="btn btn-primary btn-full" onclick="generateReport()">
-              <span class="material-icons-round">download</span>
-              Download
-            </button>
-          </div>
+        <div class="report-text">
+          <div class="report-title">Weekly Timesheet</div>
+          <div class="report-desc">Last 7 days summary</div>
         </div>
-        
-        <div class="report-preview" id="reportPreview" style="display: none;">
-          <div class="preview-header">
-            <h3>Report Preview</h3>
-            <button class="action-btn" onclick="closePreview()">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <div class="preview-content" id="previewContent"></div>
+      </div>
+      
+      <div class="report-type-card ${appState.reportType === 'monthly' ? 'selected' : ''}" onclick="selectReportType('monthly')">
+        <div class="report-icon">
+          <span class="material-icons-round">calendar_today</span>
         </div>
-        
-        <div class="recent-reports">
-          <div class="card-header">
-            <h3 class="card-title">
-              <span class="material-icons-round">history</span>
-              Recent Reports
-            </h3>
-          </div>
-          
-          <div class="reports-list" id="recentReportsList">
-            ${renderRecentReports()}
-          </div>
+        <div class="report-text">
+          <div class="report-title">Monthly Report</div>
+          <div class="report-desc">Complete month summary</div>
         </div>
-      `;
-    }
+      </div>
+    </div>
     
+    <!-- Report Form -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <span class="material-icons-round">settings</span>
+          Report Configuration
+        </h3>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label required">Date Range</label>
+        <div class="date-range">
+          <div>
+            <label style="font-size: 12px; color: var(--outline);">Start Date</label>
+            <input type="date" class="form-input" id="startDate" required>
+          </div>
+          <div>
+            <label style="font-size: 12px; color: var(--outline);">End Date</label>
+            <input type="date" class="form-input" id="endDate" required>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label required">Format</label>
+        <div class="format-options">
+          <div class="format-option ${appState.format === 'pdf' ? 'selected' : ''}" onclick="selectFormat('pdf')">
+            <div class="format-icon">
+              <i class="fas fa-file-pdf"></i>
+            </div>
+            <div class="format-name">PDF</div>
+          </div>
+          
+          <div class="format-option ${appState.format === 'excel' ? 'selected' : ''}" onclick="selectFormat('excel')">
+            <div class="format-icon">
+              <i class="fas fa-file-excel"></i>
+            </div>
+            <div class="format-name">Excel</div>
+          </div>
+          
+          <div class="format-option ${appState.format === 'csv' ? 'selected' : ''}" onclick="selectFormat('csv')">
+            <div class="format-icon">
+              <i class="fas fa-file-csv"></i>
+            </div>
+            <div class="format-name">CSV</div>
+          </div>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
+        <button class="btn btn-secondary btn-full" onclick="previewReport()">
+          <span class="material-icons-round">visibility</span>
+          Preview
+        </button>
+        <button class="btn btn-primary btn-full" onclick="generateReport()">
+          <span class="material-icons-round">download</span>
+          Download
+        </button>
+      </div>
+    </div>
+    
+    <!-- Report Preview -->
+    <div class="report-preview" id="reportPreview" style="display: none;">
+      <div class="preview-header">
+        <h3>Report Preview</h3>
+        <button class="action-btn" onclick="closePreview()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="preview-content" id="previewContent"></div>
+    </div>
+    
+    <!-- Recent Reports -->
+    <div class="recent-reports">
+      <div class="card-header">
+        <h3 class="card-title">
+          <span class="material-icons-round">history</span>
+          Recent Reports
+        </h3>
+      </div>
+      
+      <div class="reports-list" id="recentReportsList">
+        ${renderRecentReports()}
+      </div>
+    </div>
+  `;
+}    
     // Load More
     function loadMore() {
       return `
