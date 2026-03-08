@@ -1,7 +1,7 @@
 // api.js - Google Sheets API wrapper for GitHub Pages
 const API = {
   // Replace with your Google Apps Script deployment URL
-  baseUrl: 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec',
+  baseUrl: 'https://script.google.com/macros/s/AKfycby9mZGt2G9CI9HZqel8YTmExiR2HWqDb2iEk7McgYYp5Iz2eWXkrcZFhNAPdu9HQtHE/exec',
   
   // Generic request function
   async request(action, params = {}) {
