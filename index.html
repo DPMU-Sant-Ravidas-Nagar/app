@@ -3,59 +3,319 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#6750A4">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TrackMaster">
   
-  <!-- Performance Optimizations -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_192dp.png">
+  <link rel="apple-touch-icon" href="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_192dp.png">
+  
+  <!-- Preconnect for faster loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://script.google.com">
   <link rel="dns-prefetch" href="https://script.google.com">
   
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-  
-  <!-- Styles -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
-  
-  <title>TrackMaster</title>
   
   <style>
-    /* Additional styles for tabs */
-    .nav-item {
-      cursor: pointer;
+    /* Additional styles from timesheet for reports and more tab */
+    .report-types {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
     }
-    .nav-item.active {
-      color: var(--primary);
+    
+    .report-type-card {
+      background: var(--surface-container);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+    }
+    
+    .report-type-card.selected {
+      border-color: var(--primary);
       background: var(--primary-light);
     }
-    .filter-bar {
+    
+    .report-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--primary-light);
+      color: var(--primary);
       display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      overflow-x: auto;
-      padding: 5px 0;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      font-size: 20px;
     }
-    .filter-chip {
-      padding: 8px 16px;
-      border-radius: 20px;
-      background: var(--surface-container);
-      border: none;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .filter-chip.active {
+    
+    .report-type-card.selected .report-icon {
       background: var(--primary);
       color: white;
     }
-    .badge {
+    
+    .report-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .report-desc {
+      font-size: 12px;
+      color: var(--outline);
+    }
+    
+    .date-range {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    
+    .format-options {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    
+    .format-option {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid var(--outline);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .format-option.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    
+    .format-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: var(--outline);
+    }
+    
+    .format-option.selected .format-icon {
+      color: var(--primary);
+    }
+    
+    .format-name {
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .report-preview {
+      background: var(--surface-container);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .preview-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .preview-content {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--outline);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--surface);
+    }
+    
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    
+    .preview-table th {
       background: var(--primary-light);
       color: var(--primary);
-      padding: 4px 8px;
-      border-radius: 12px;
+      padding: 8px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid var(--primary);
+    }
+    
+    .preview-table td {
+      padding: 8px;
+      border-bottom: 1px solid var(--outline);
+    }
+    
+    .recent-reports {
+      background: var(--surface-container);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-top: 24px;
+    }
+    
+    .reports-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    
+    .report-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--surface);
+      border-radius: 8px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .report-item:hover {
+      background: var(--primary-light);
+    }
+    
+    .report-item-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .report-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .report-item-name {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+    
+    .report-item-details {
+      display: flex;
+      gap: 12px;
       font-size: 12px;
+      color: var(--outline);
+    }
+    
+    .report-item-actions {
+      display: flex;
+      gap: 4px;
+    }
+    
+    .action-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: none;
+      color: var(--outline);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-1);
+    }
+    
+    .action-btn:hover {
+      color: var(--primary);
+    }
+    
+    /* More tab styles */
+    .more-menu {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+    
+    .more-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      padding: var(--spacing-lg);
+      background: var(--surface-container);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .more-item:active {
+      transform: scale(0.98);
+      background: var(--primary-light);
+    }
+    
+    .more-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .more-content {
+      flex: 1;
+    }
+    
+    .more-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .more-subtitle {
+      font-size: 12px;
+      color: var(--outline);
+    }
+    
+    .info-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--spacing-sm) 0;
+      border-bottom: 1px solid var(--outline);
+    }
+    
+    .info-label {
+      color: var(--outline);
+    }
+    
+    .info-value {
+      font-weight: 500;
     }
   </style>
 </head>
@@ -89,20 +349,7 @@
       <!-- Main Content -->
       <div class="main-content">
         <div class="page-container">
-          <div class="page" id="currentPage">
-            <!-- Loading Skeleton -->
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">Loading...</h3>
-              </div>
-              <div class="stats-grid">
-                <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
-                <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
-                <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
-                <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
-              </div>
-            </div>
-          </div>
+          <div class="page" id="currentPage"></div>
         </div>
       </div>
       
@@ -111,28 +358,45 @@
         <span class="material-icons-round">add</span>
       </button>
       
-      <!-- Bottom Navigation - IMPORTANT: These onclick handlers must work -->
+      <!-- Bottom Navigation -->
       <div class="bottom-nav">
-        <a href="#" class="nav-item" onclick="event.preventDefault(); navigateTo('home'); return false;">
+        <a href="#" class="nav-item" onclick="navigateTo('home'); return false;">
           <span class="material-icons-round nav-icon">home</span>
           <span class="nav-label">Home</span>
         </a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); navigateTo('myactivity'); return false;">
+        <a href="#" class="nav-item" onclick="navigateTo('myactivity'); return false;">
           <span class="material-icons-round nav-icon">list_alt</span>
           <span class="nav-label">Activity</span>
         </a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); navigateTo('myteam'); return false;">
+        <a href="#" class="nav-item" onclick="navigateTo('myteam'); return false;">
           <span class="material-icons-round nav-icon">groups</span>
           <span class="nav-label">Team</span>
         </a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); navigateTo('reports'); return false;">
+        <a href="#" class="nav-item" onclick="navigateTo('reports'); return false;">
           <span class="material-icons-round nav-icon">download</span>
           <span class="nav-label">Reports</span>
         </a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); navigateTo('more'); return false;">
+        <a href="#" class="nav-item" onclick="navigateTo('more'); return false;">
           <span class="material-icons-round nav-icon">more_horiz</span>
           <span class="nav-label">More</span>
         </a>
+      </div>
+    </div>
+    
+    <!-- Install Prompt -->
+    <div id="installPrompt" class="install-prompt" style="display: none;">
+      <div class="install-header">
+        <div class="install-icon">
+          <span class="material-icons-round">install_mobile</span>
+        </div>
+        <div>
+          <div class="install-title">Install TrackMaster</div>
+          <div class="install-subtitle">Add to home screen for better experience</div>
+        </div>
+      </div>
+      <div class="install-actions">
+        <button class="btn btn-primary" style="flex: 1;" onclick="installApp()">Install</button>
+        <button class="btn btn-secondary" style="flex: 1;" onclick="dismissInstall()">Not Now</button>
       </div>
     </div>
     
@@ -146,19 +410,19 @@
     <div class="toast-container" id="toastContainer"></div>
   </div>
   
-  <!-- API Script -->
   <script src="api.js"></script>
-  
   <script>
     // App State
     const appState = {
       currentUser: null,
       isOnline: navigator.onLine,
+      deferredPrompt: null,
       currentPage: 'home',
-      reportType: 'weekly',
-      format: 'csv',
+      offlineActivities: JSON.parse(localStorage.getItem('offlineActivities') || '[]'),
       recentReports: JSON.parse(localStorage.getItem('recentReports') || '[]'),
-      offlineActivities: JSON.parse(localStorage.getItem('offlineActivities') || '[]')
+      reportType: 'weekly',
+      format: 'pdf',
+      previewData: null
     };
     
     // Page Cache
@@ -195,15 +459,13 @@
       setupEventListeners();
       registerServiceWorker();
       
-      // Check URL hash for direct navigation
       const hash = window.location.hash.substring(1);
       const initialPage = hash || 'home';
       
-      // Set active nav
       updateActiveNav(initialPage);
-      
-      // Load initial page
       await navigateTo(initialPage, false);
+      
+      setTimeout(checkInstallPrompt, 3000);
     }
     
     // Register Service Worker
@@ -234,9 +496,19 @@
         const page = e.state?.page || 'home';
         navigateTo(page, false);
       });
+      
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        appState.deferredPrompt = e;
+      });
+      
+      window.addEventListener('appinstalled', () => {
+        appState.deferredPrompt = null;
+        showToast('App installed successfully!', 'success');
+      });
     }
     
-    // Update active navigation item
+    // Update active navigation
     function updateActiveNav(page) {
       const navMap = { home: 0, myactivity: 1, myteam: 2, reports: 3, more: 4 };
       document.querySelectorAll('.nav-item').forEach((item, index) => {
@@ -248,70 +520,36 @@
       });
     }
     
-    // Sync offline activities
-    async function syncOfflineActivities() {
-      if (appState.offlineActivities.length > 0) {
-        showToast('Syncing offline activities...', 'info');
-        
-        for (const activity of appState.offlineActivities) {
-          try {
-            const result = await API.saveActivity(activity);
-            if (result.success) {
-              appState.offlineActivities = appState.offlineActivities.filter(a => a !== activity);
-              localStorage.setItem('offlineActivities', JSON.stringify(appState.offlineActivities));
-            }
-          } catch (error) {
-            console.error('Sync failed:', error);
-          }
-        }
-        
-        showToast('Sync completed!', 'success');
-      }
-    }
-    
-    // Navigation function - THIS IS THE KEY FUNCTION
+    // Navigation
     async function navigateTo(page, addToHistory = true) {
-      console.log('Navigating to:', page);
+      event?.preventDefault();
       
-      // Update current page
       appState.currentPage = page;
-      
-      // Update active nav
       updateActiveNav(page);
       
-      // Add to browser history
       if (addToHistory) {
         history.pushState({ page }, '', '#' + page);
       }
       
-      // Show cached page immediately if available
       const container = document.getElementById('currentPage');
       const cached = pageCache.get(page);
       
       if (cached) {
         container.innerHTML = cached;
       } else {
-        // Show loading skeleton
         container.innerHTML = getLoadingSkeleton();
       }
       
-      // Load fresh content
       await loadPageContent(page);
     }
     
-    // Get loading skeleton
+    // Loading skeleton
     function getLoadingSkeleton() {
       return `
         <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Loading...</h3>
-          </div>
-          <div class="stats-grid">
-            <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
-            <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
-            <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
-            <div class="stat-card"><div class="stat-value">---</div><div class="stat-label">Loading</div></div>
-          </div>
+          <div class="skeleton" style="height: 24px; width: 60%; margin-bottom: 16px;"></div>
+          <div class="skeleton" style="height: 80px; margin-bottom: 12px;"></div>
+          <div class="skeleton" style="height: 80px;"></div>
         </div>
       `;
     }
@@ -339,13 +577,14 @@
           case 'more':
             html = loadMore();
             break;
-          default:
-            html = await loadDashboard();
         }
         
-        // Cache the page
         pageCache.set(page, html);
         container.innerHTML = html;
+        
+        // Initialize page-specific functions
+        if (page === 'reports') initReportsPage();
+        if (page === 'myactivity') initActivityPage();
         
       } catch (error) {
         console.error('Error loading page:', error);
@@ -353,12 +592,8 @@
           <div class="card">
             <div style="text-align: center; padding: 40px;">
               <span class="material-icons-round" style="font-size: 48px; color: var(--error);">error</span>
-              <h3>Error Loading Page</h3>
-              <p style="color: var(--outline); margin: 20px 0;">${error.message}</p>
-              <button class="btn btn-primary" onclick="navigateTo('${appState.currentPage}')">
-                <span class="material-icons-round">refresh</span>
-                Retry
-              </button>
+              <p style="margin-top: 16px;">Failed to load page</p>
+              <button class="btn btn-primary" onclick="navigateTo('${page}')" style="margin-top: 16px;">Retry</button>
             </div>
           </div>
         `;
@@ -374,7 +609,6 @@
         
         if (result.success) {
           const stats = result.stats;
-          
           return `
             <div class="card">
               <div class="card-header">
@@ -416,14 +650,13 @@
                     <div class="stat-value">${count}</div>
                     <div class="stat-label">${type}</div>
                   </div>
-                `).join('') || '<div class="stat-card"><div class="stat-value">0</div><div class="stat-label">No Data</div></div>'}
+                `).join('')}
               </div>
             </div>
           `;
         }
         return '<div class="card">Error loading dashboard</div>';
       } catch (error) {
-        console.error('Dashboard error:', error);
         return '<div class="card">Error loading dashboard</div>';
       }
     }
@@ -436,7 +669,6 @@
         const result = await API.getUserActivities(appState.currentUser.staffId, 'all');
         
         if (result.success && result.activities.length > 0) {
-          // Group activities by month
           const grouped = {};
           result.activities.forEach(activity => {
             const date = new Date(activity.date);
@@ -445,20 +677,14 @@
             grouped[monthYear].push(activity);
           });
           
-          let html = `
-            <div class="filter-bar">
-              <button class="filter-chip active" onclick="filterActivities('all')">All</button>
-              <button class="filter-chip" onclick="filterActivities('weekly')">This Week</button>
-              <button class="filter-chip" onclick="filterActivities('monthly')">This Month</button>
-            </div>
-          `;
+          let html = '';
           
           Object.entries(grouped).forEach(([month, activities]) => {
             html += `
               <div class="card">
                 <div class="card-header">
                   <h3 class="card-title">${month}</h3>
-                  <span class="badge">${activities.length} activities</span>
+                  <span class="activity-day">${activities.length} activities</span>
                 </div>
                 <div class="activity-list">
                   ${activities.map(a => `
@@ -506,12 +732,11 @@
           </div>
         `;
       } catch (error) {
-        console.error('Activity error:', error);
         return '<div class="card">Error loading activities</div>';
       }
     }
     
-    // Load My Team
+    // Load My Team - Updated with all team sheet columns
     async function loadMyTeam() {
       try {
         const result = await API.getTeamMembers();
@@ -537,8 +762,12 @@
                         <div class="member-role">${escapeHtml(member.designation || 'Team Member')}</div>
                       </div>
                     </div>
-                    <div class="member-id">${escapeHtml(member.staffId || 'N/A')}</div>
-                    <div class="member-contact">${escapeHtml(member.contactNo || 'No contact')}</div>
+                    <div style="margin-top: 10px;">
+                      <div class="member-id">ID: ${escapeHtml(member.staffId || 'N/A')}</div>
+                      <div class="member-contact">📞 ${escapeHtml(member.contactNo || 'No contact')}</div>
+                      <div class="member-contact">✉️ ${escapeHtml(member.email || 'No email')}</div>
+                      <div class="member-role">Role: ${escapeHtml(member.role || 'User')}</div>
+                    </div>
                   </div>
                 `).join('')}
               </div>
@@ -547,86 +776,123 @@
         }
         return '<div class="card">Error loading team</div>';
       } catch (error) {
-        console.error('Team error:', error);
         return '<div class="card">Error loading team</div>';
       }
     }
     
-    // Load Reports
+    // Load Reports - From timesheet.html
     function loadReports() {
       return `
+        <!-- Report Types -->
+        <div class="report-types">
+          <div class="report-type-card ${appState.reportType === 'weekly' ? 'selected' : ''}" onclick="selectReportType('weekly')">
+            <div class="report-icon">
+              <i class="fas fa-calendar-week"></i>
+            </div>
+            <div class="report-title">Weekly Timesheet</div>
+            <div class="report-desc">Last 7 days summary</div>
+          </div>
+          
+          <div class="report-type-card ${appState.reportType === 'monthly' ? 'selected' : ''}" onclick="selectReportType('monthly')">
+            <div class="report-icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="report-title">Monthly Report</div>
+            <div class="report-desc">Complete month summary</div>
+          </div>
+        </div>
+        
+        <!-- Report Form -->
         <div class="card">
           <div class="card-header">
             <h3 class="card-title">
-              <span class="material-icons-round">assessment</span>
-              Generate Report
+              <span class="material-icons-round">settings</span>
+              Report Configuration
             </h3>
           </div>
           
-          <div class="report-types">
-            <div class="report-type-card ${appState.reportType === 'weekly' ? 'selected' : ''}" onclick="selectReportType('weekly')">
-              <div class="report-icon">
-                <span class="material-icons-round">date_range</span>
+          <div class="form-group">
+            <label class="form-label required">Date Range</label>
+            <div class="date-range">
+              <div>
+                <label style="font-size: 12px; color: var(--outline);">Start Date</label>
+                <input type="date" class="form-input" id="startDate" required>
               </div>
-              <div>Weekly Report</div>
-            </div>
-            <div class="report-type-card ${appState.reportType === 'monthly' ? 'selected' : ''}" onclick="selectReportType('monthly')">
-              <div class="report-icon">
-                <span class="material-icons-round">calendar_month</span>
+              <div>
+                <label style="font-size: 12px; color: var(--outline);">End Date</label>
+                <input type="date" class="form-input" id="endDate" required>
               </div>
-              <div>Monthly Report</div>
             </div>
           </div>
           
           <div class="form-group">
-            <label class="form-label">Download Format</label>
+            <label class="form-label required">Format</label>
             <div class="format-options">
               <div class="format-option ${appState.format === 'pdf' ? 'selected' : ''}" onclick="selectFormat('pdf')">
-                <span class="material-icons-round">picture_as_pdf</span>
-                <div>PDF</div>
+                <div class="format-icon">
+                  <i class="fas fa-file-pdf"></i>
+                </div>
+                <div class="format-name">PDF</div>
               </div>
+              
+              <div class="format-option ${appState.format === 'excel' ? 'selected' : ''}" onclick="selectFormat('excel')">
+                <div class="format-icon">
+                  <i class="fas fa-file-excel"></i>
+                </div>
+                <div class="format-name">Excel</div>
+              </div>
+              
               <div class="format-option ${appState.format === 'csv' ? 'selected' : ''}" onclick="selectFormat('csv')">
-                <span class="material-icons-round">table_chart</span>
-                <div>CSV</div>
+                <div class="format-icon">
+                  <i class="fas fa-file-csv"></i>
+                </div>
+                <div class="format-name">CSV</div>
               </div>
             </div>
           </div>
           
-          <button class="btn btn-primary btn-full" onclick="generateReport()">
-            <span class="material-icons-round">download</span>
-            Generate Report
-          </button>
+          <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
+            <button class="btn btn-secondary btn-full" onclick="previewReport()">
+              <span class="material-icons-round">visibility</span>
+              Preview
+            </button>
+            <button class="btn btn-primary btn-full" onclick="generateReport()">
+              <span class="material-icons-round">download</span>
+              Download
+            </button>
+          </div>
         </div>
         
-        <div class="card">
+        <!-- Report Preview -->
+        <div class="report-preview" id="reportPreview" style="display: none;">
+          <div class="preview-header">
+            <h3>Report Preview</h3>
+            <button class="action-btn" onclick="closePreview()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="preview-content" id="previewContent">
+            <!-- Preview will be loaded here -->
+          </div>
+        </div>
+        
+        <!-- Recent Reports -->
+        <div class="recent-reports">
           <div class="card-header">
             <h3 class="card-title">
               <span class="material-icons-round">history</span>
               Recent Reports
             </h3>
           </div>
-          <div class="activity-list">
-            ${appState.recentReports.length > 0 ? appState.recentReports.map(report => `
-              <div class="activity-item" onclick="downloadReport('${report.id}')">
-                <div class="activity-header">
-                  <span class="activity-date">${report.date}</span>
-                  <span class="activity-day">${report.type}</span>
-                </div>
-                <div class="activity-description">${report.name}</div>
-              </div>
-            `).join('') : `
-              <div style="padding: 20px; text-align: center; color: var(--outline);">
-                No reports generated yet
-              </div>
-            `}
+          
+          <div class="reports-list" id="recentReportsList">
+            ${renderRecentReports()}
           </div>
         </div>
-        
-        <div id="reportPreview" style="display: none;"></div>
       `;
     }
     
-    // Load More Tab
+    // Load More - From timesheet.html
     function loadMore() {
       return `
         <div class="card">
@@ -649,13 +915,35 @@
         </div>
         
         <div class="more-menu">
-          <div class="more-item" onclick="showSettings()">
+          <div class="more-item" onclick="showProfile()">
             <div class="more-icon">
-              <span class="material-icons-round">settings</span>
+              <span class="material-icons-round">edit</span>
             </div>
             <div class="more-content">
-              <div class="more-title">Settings</div>
-              <div class="more-subtitle">App preferences and settings</div>
+              <div class="more-title">Edit Profile</div>
+              <div class="more-subtitle">Update your personal information</div>
+            </div>
+            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
+          </div>
+          
+          <div class="more-item" onclick="showNotificationsSettings()">
+            <div class="more-icon">
+              <span class="material-icons-round">notifications</span>
+            </div>
+            <div class="more-content">
+              <div class="more-title">Notifications</div>
+              <div class="more-subtitle">Manage notification preferences</div>
+            </div>
+            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
+          </div>
+          
+          <div class="more-item" onclick="showPrivacySettings()">
+            <div class="more-icon">
+              <span class="material-icons-round">security</span>
+            </div>
+            <div class="more-content">
+              <div class="more-title">Privacy & Security</div>
+              <div class="more-subtitle">Manage your privacy settings</div>
             </div>
             <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
           </div>
@@ -667,6 +955,17 @@
             <div class="more-content">
               <div class="more-title">Help & Support</div>
               <div class="more-subtitle">FAQs and contact support</div>
+            </div>
+            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
+          </div>
+          
+          <div class="more-item" onclick="clearCache()">
+            <div class="more-icon">
+              <span class="material-icons-round">delete</span>
+            </div>
+            <div class="more-content">
+              <div class="more-title">Clear Cache</div>
+              <div class="more-subtitle">Free up storage space</div>
             </div>
             <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
           </div>
@@ -683,113 +982,331 @@
           </div>
         </div>
         
-        <div class="card" style="margin-top: var(--spacing-lg);">
+        <div class="card">
           <div class="card-header">
             <h3 class="card-title">
               <span class="material-icons-round">storage</span>
               Storage
             </h3>
           </div>
-          <div style="padding: var(--spacing-md);">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-              <span>Offline Activities</span>
-              <span>${appState.offlineActivities.length} pending</span>
+          
+          <div class="info-grid">
+            <div class="info-row">
+              <span class="info-label">Offline Activities</span>
+              <span class="info-value">${appState.offlineActivities.length}</span>
             </div>
-            <button class="btn btn-secondary btn-full" style="margin-top: 15px;" onclick="clearOfflineData()">
-              <span class="material-icons-round">delete_sweep</span>
-              Clear Offline Data
-            </button>
+            <div class="info-row">
+              <span class="info-label">Recent Reports</span>
+              <span class="info-value">${appState.recentReports.length}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Storage Used</span>
+              <span class="info-value">${(JSON.stringify(localStorage).length / 1024).toFixed(2)} KB</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Last Sync</span>
+              <span class="info-value" id="lastSyncTime">${new Date().toLocaleTimeString()}</span>
+            </div>
           </div>
-        </div>
-        
-        <div class="version-info">
-          TrackMaster v1.0.0<br>
-          © 2026 All rights reserved
         </div>
       `;
     }
     
-    // Filter activities
-    async function filterActivities(filter) {
-      document.querySelectorAll('.filter-chip').forEach(chip => {
-        chip.classList.remove('active');
-      });
-      event.target.classList.add('active');
+    // Render recent reports
+    function renderRecentReports() {
+      if (appState.recentReports.length === 0) {
+        return `
+          <div style="text-align: center; padding: 20px; color: var(--outline);">
+            <i class="fas fa-file" style="font-size: 24px; margin-bottom: 8px; opacity: 0.5;"></i>
+            <p>No recent reports</p>
+          </div>
+        `;
+      }
       
-      document.getElementById('loading').style.display = 'flex';
-      
-      try {
-        const result = await API.getUserActivities(appState.currentUser.staffId, filter);
-        document.getElementById('loading').style.display = 'none';
+      return appState.recentReports.slice(0, 5).map((report, index) => {
+        const icon = report.format === 'pdf' ? 'file-pdf' : 
+                    report.format === 'excel' ? 'file-excel' : 'file-csv';
         
-        if (result.success) {
-          pageCache.delete('myactivity');
-          await loadPageContent('myactivity');
-        }
-      } catch (error) {
-        document.getElementById('loading').style.display = 'none';
-        showToast('Error filtering activities', 'error');
+        return `
+          <div class="report-item" onclick="downloadRecentReport(${index})">
+            <div class="report-item-icon">
+              <i class="fas fa-${icon}"></i>
+            </div>
+            <div class="report-item-info">
+              <div class="report-item-name">${report.name || 'Report'}</div>
+              <div class="report-item-details">
+                <span>${report.type || 'Report'}</span>
+                <span>${report.format?.toUpperCase() || 'PDF'}</span>
+                <span>${report.date || ''}</span>
+              </div>
+            </div>
+            <div class="report-item-actions" onclick="event.stopPropagation()">
+              <button class="action-btn" onclick="downloadRecentReport(${index})" title="Download">
+                <i class="fas fa-download"></i>
+              </button>
+              <button class="action-btn" onclick="deleteRecentReport(${index})" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // Report Functions
+    function selectReportType(type) {
+      appState.reportType = type;
+      
+      document.querySelectorAll('.report-type-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+      event.currentTarget.classList.add('selected');
+      
+      const today = new Date();
+      const startDate = new Date(today);
+      
+      if (type === 'weekly') {
+        startDate.setDate(today.getDate() - 7);
+      } else {
+        startDate.setMonth(today.getMonth() - 1);
+      }
+      
+      document.getElementById('startDate').valueAsDate = startDate;
+      document.getElementById('endDate').valueAsDate = today;
+    }
+    
+    function selectFormat(format) {
+      appState.format = format;
+      
+      document.querySelectorAll('.format-option').forEach(option => {
+        option.classList.remove('selected');
+      });
+      event.currentTarget.classList.add('selected');
+    }
+    
+    function initReportsPage() {
+      const today = new Date();
+      const startDate = new Date(today);
+      startDate.setDate(today.getDate() - 7);
+      
+      const startInput = document.getElementById('startDate');
+      const endInput = document.getElementById('endDate');
+      
+      if (startInput && endInput) {
+        startInput.valueAsDate = startDate;
+        endInput.valueAsDate = today;
       }
     }
     
-    // Select report type
-    function selectReportType(type) {
-      appState.reportType = type;
-      loadPageContent('reports');
-    }
-    
-    // Select format
-    function selectFormat(format) {
-      appState.format = format;
-      loadPageContent('reports');
-    }
-    
-    // Generate report
-    async function generateReport() {
-      if (!appState.currentUser) return;
+    function validateDates() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
       
-      showToast('Generating report...', 'info');
+      if (!startDate || !endDate) {
+        showToast('Please select start and end dates', 'error');
+        return false;
+      }
+      
+      if (new Date(startDate) > new Date(endDate)) {
+        showToast('Start date cannot be after end date', 'error');
+        return false;
+      }
+      
+      return true;
+    }
+    
+    async function previewReport() {
+      if (!validateDates()) return;
+      
+      showLoading('Loading preview...');
       
       try {
+        const result = await API.getUserActivities(
+          appState.currentUser.staffId,
+          'all'
+        );
+        
+        if (result.success) {
+          const startDate = new Date(document.getElementById('startDate').value);
+          const endDate = new Date(document.getElementById('endDate').value);
+          
+          const filtered = result.activities.filter(a => {
+            const activityDate = new Date(a.date);
+            return activityDate >= startDate && activityDate <= endDate;
+          });
+          
+          showPreview(filtered);
+        }
+      } catch (error) {
+        showToast('Failed to load preview', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    function showPreview(activities) {
+      const previewContent = document.getElementById('previewContent');
+      
+      if (!activities || activities.length === 0) {
+        previewContent.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: var(--outline);">
+            <i class="fas fa-clipboard-list" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+            <p>No activities found for the selected date range</p>
+          </div>
+        `;
+      } else {
+        let html = `
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Location</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        
+        activities.slice(0, 10).forEach(activity => {
+          html += `
+            <tr>
+              <td>${activity.date}</td>
+              <td>${escapeHtml(activity.description.substring(0, 30))}${activity.description.length > 30 ? '...' : ''}</td>
+              <td>${activity.location || 'N/A'}</td>
+              <td>${activity.status}</td>
+            </tr>
+          `;
+        });
+        
+        if (activities.length > 10) {
+          html += `
+            <tr>
+              <td colspan="4" style="text-align: center; font-style: italic; color: var(--outline);">
+                ... and ${activities.length - 10} more activities
+              </td>
+            </tr>
+          `;
+        }
+        
+        html += `
+            </tbody>
+          </table>
+          <div style="margin-top: 12px; font-size: 12px; color: var(--outline);">
+            Showing ${Math.min(activities.length, 10)} of ${activities.length} activities
+          </div>
+        `;
+        
+        previewContent.innerHTML = html;
+      }
+      
+      document.getElementById('reportPreview').style.display = 'block';
+    }
+    
+    function closePreview() {
+      document.getElementById('reportPreview').style.display = 'none';
+    }
+    
+    async function generateReport() {
+      if (!validateDates()) return;
+      
+      showLoading('Generating report...');
+      
+      try {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        
         const result = await API.generateReport(
           appState.currentUser.staffId,
           appState.reportType,
           appState.format,
-          new Date().getMonth(),
-          new Date().getFullYear()
+          startDate,
+          endDate
         );
         
         if (result.success) {
-          if (appState.format === 'csv' && result.data) {
-            // Download CSV
+          if (result.data) {
             const blob = new Blob([result.data], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = result.filename || `report_${appState.reportType}_${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = result.filename || `report_${appState.reportType}.csv`;
             a.click();
             window.URL.revokeObjectURL(url);
-            
-            // Add to recent reports
-            const report = {
-              id: Date.now(),
-              name: `${appState.reportType.charAt(0).toUpperCase() + appState.reportType.slice(1)} Report`,
-              date: new Date().toLocaleDateString(),
-              type: appState.reportType
-            };
-            appState.recentReports.unshift(report);
-            if (appState.recentReports.length > 5) appState.recentReports.pop();
-            localStorage.setItem('recentReports', JSON.stringify(appState.recentReports));
-            
-            showToast('Report downloaded successfully!', 'success');
-          } else {
-            showToast('Report generated!', 'success');
           }
+          
+          // Save to recent reports
+          const report = {
+            id: Date.now(),
+            name: `${appState.reportType} Report`,
+            type: appState.reportType,
+            format: appState.format,
+            date: new Date().toLocaleDateString(),
+            startDate,
+            endDate
+          };
+          
+          appState.recentReports.unshift(report);
+          if (appState.recentReports.length > 10) appState.recentReports.pop();
+          localStorage.setItem('recentReports', JSON.stringify(appState.recentReports));
+          
+          document.getElementById('recentReportsList').innerHTML = renderRecentReports();
+          showToast('Report generated successfully', 'success');
         } else {
-          showToast(result.message || 'Error generating report', 'error');
+          showToast(result.message || 'Failed to generate report', 'error');
         }
       } catch (error) {
         showToast('Error generating report', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    function downloadRecentReport(index) {
+      const report = appState.recentReports[index];
+      showToast(`Downloading ${report.name}`, 'info');
+    }
+    
+    function deleteRecentReport(index) {
+      if (confirm('Delete this report?')) {
+        appState.recentReports.splice(index, 1);
+        localStorage.setItem('recentReports', JSON.stringify(appState.recentReports));
+        document.getElementById('recentReportsList').innerHTML = renderRecentReports();
+        showToast('Report deleted', 'success');
+      }
+    }
+    
+    // More tab functions
+    function showProfile() {
+      showToast('Profile settings coming soon', 'info');
+    }
+    
+    function showNotificationsSettings() {
+      showToast('Notifications settings coming soon', 'info');
+    }
+    
+    function showPrivacySettings() {
+      showToast('Privacy settings coming soon', 'info');
+    }
+    
+    function showHelp() {
+      window.open('mailto:support@trackmaster.com?subject=Help Request', '_blank');
+    }
+    
+    function showAbout() {
+      showToast('TrackMaster v1.0.0 - Timesheet Management System', 'info');
+    }
+    
+    function clearCache() {
+      if (confirm('Clear all cached data?')) {
+        pageCache.clear();
+        API.cache.clear();
+        appState.offlineActivities = [];
+        appState.recentReports = [];
+        localStorage.removeItem('offlineActivities');
+        localStorage.removeItem('recentReports');
+        showToast('Cache cleared', 'success');
+        loadPageContent('more');
       }
     }
     
@@ -815,45 +1332,66 @@
         .replace(/'/g, '&#039;');
     }
     
-    // Edit activity
     function editActivity(rowId) {
       sessionStorage.setItem('editActivityId', rowId);
       window.location.href = 'newactivity.html?edit=' + rowId;
     }
     
-    // View member profile
     function viewMemberProfile(staffId) {
       showToast('Viewing profile: ' + staffId, 'info');
     }
     
-    // Show notifications
     function showNotifications() {
       showToast('No new notifications', 'info');
     }
     
-    // Settings
-    function showSettings() {
-      showToast('Settings coming soon', 'info');
+    // Install prompt
+    function checkInstallPrompt() {
+      if (appState.deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
+        document.getElementById('installPrompt').style.display = 'block';
+      }
     }
     
-    // Help
-    function showHelp() {
-      showToast('Help & Support', 'info');
+    function installApp() {
+      if (appState.deferredPrompt) {
+        appState.deferredPrompt.prompt();
+        appState.deferredPrompt = null;
+        document.getElementById('installPrompt').style.display = 'none';
+      }
     }
     
-    // About
-    function showAbout() {
-      showToast('TrackMaster v1.0.0', 'info');
+    function dismissInstall() {
+      document.getElementById('installPrompt').style.display = 'none';
+      localStorage.setItem('installPromptDismissed', Date.now());
     }
     
-    // Clear offline data
-    function clearOfflineData() {
-      if (confirm('Clear all offline data?')) {
+    // Sync offline activities
+    async function syncOfflineActivities() {
+      if (appState.offlineActivities.length > 0) {
+        showToast('Syncing offline activities...', 'info');
+        
+        for (const activity of appState.offlineActivities) {
+          try {
+            await API.saveActivity(activity);
+          } catch (error) {
+            console.error('Sync failed:', error);
+          }
+        }
+        
         appState.offlineActivities = [];
         localStorage.removeItem('offlineActivities');
-        loadPageContent('more');
-        showToast('Offline data cleared', 'success');
+        showToast('Sync completed!', 'success');
       }
+    }
+    
+    // Loading functions
+    function showLoading(text) {
+      document.getElementById('loadingText').textContent = text || 'Loading...';
+      document.getElementById('loading').style.display = 'flex';
+    }
+    
+    function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
     }
     
     // Refresh data
@@ -881,15 +1419,14 @@
       toast.className = `toast ${type}`;
       toast.textContent = message;
       
-      const container = document.getElementById('toastContainer');
-      container.appendChild(toast);
+      document.getElementById('toastContainer').appendChild(toast);
       
       setTimeout(() => {
         toast.remove();
       }, 3000);
     }
     
-    // Initialize on load
+    // Initialize
     window.onload = initApp;
   </script>
 </body>
