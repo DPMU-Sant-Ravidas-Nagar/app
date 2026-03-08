@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#6750A4">
+  
+  <!-- Preconnect for faster loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://script.google.com">
+  
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <script src="api.js"></script>
   
   <style>
     .login-container {
@@ -29,7 +33,18 @@
       text-align: center;
       width: 100%;
       max-width: 400px;
-      margin: var(--spacing-xl) 0;
+      animation: slideUp 0.5s ease;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
     .app-logo {
@@ -78,7 +93,7 @@
       font-size: 16px;
       font-family: inherit;
       background: white;
-      transition: border-color 0.2s;
+      transition: all 0.3s ease;
     }
     
     .form-input:focus {
@@ -103,42 +118,54 @@
       padding: var(--spacing-xs);
     }
     
-    .remember-me {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      margin: var(--spacing-lg) 0;
-      font-size: 14px;
-    }
-    
     .login-button {
       width: 100%;
       padding: var(--spacing-lg);
       background: var(--primary);
-      color: var(--on-primary);
+      color: white;
       border: none;
       border-radius: var(--radius-sm);
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       margin: var(--spacing-lg) 0;
-      transition: background-color 0.2s;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .login-button:hover {
+      background: #5A4790;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3);
     }
     
     .login-button:active {
-      background: color-mix(in srgb, var(--primary) 90%, black);
-      transform: scale(0.98);
+      transform: translateY(0);
     }
     
-    .forgot-password {
-      text-align: center;
-      margin: var(--spacing-lg) 0;
+    .login-button.loading {
+      pointer-events: none;
+      opacity: 0.7;
     }
     
-    .forgot-password a {
-      color: var(--primary);
-      text-decoration: none;
-      font-size: 14px;
+    .login-button.loading::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      top: 50%;
+      left: 50%;
+      margin-left: -10px;
+      margin-top: -10px;
+      border: 2px solid transparent;
+      border-top-color: white;
+      border-radius: 50%;
+      animation: button-spin 0.8s linear infinite;
+    }
+    
+    @keyframes button-spin {
+      to { transform: rotate(360deg); }
     }
     
     .error-message {
@@ -146,38 +173,25 @@
       margin: var(--spacing-md) 0;
       font-size: 14px;
       display: none;
+      padding: var(--spacing-sm);
+      background: rgba(179, 38, 30, 0.1);
+      border-radius: var(--radius-sm);
     }
     
-    .biometric-login {
-      margin-top: var(--spacing-2xl);
-      padding-top: var(--spacing-xl);
-      border-top: 1px solid var(--outline);
+    .forgot-password {
+      text-align: center;
     }
     
-    .biometric-button {
-      width: 64px;
-      height: 64px;
-      border-radius: var(--radius-full);
-      border: 2px solid var(--primary);
-      background: transparent;
+    .forgot-password a {
       color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto var(--spacing-md);
-      cursor: pointer;
-      transition: all 0.2s;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s;
     }
     
-    .biometric-button:active {
-      background: var(--primary);
-      color: var(--on-primary);
-      transform: scale(0.95);
-    }
-    
-    .biometric-label {
-      color: var(--outline);
-      font-size: 12px;
+    .forgot-password a:hover {
+      color: #5A4790;
+      text-decoration: underline;
     }
     
     @keyframes shake {
@@ -202,6 +216,7 @@
       }
     }
   </style>
+  <script src="api.js"></script>
 </head>
 <body>
   <div class="login-container">
@@ -213,42 +228,30 @@
       <h1 class="app-title">TrackMaster</h1>
       <p class="app-subtitle">Timesheet Management System</p>
       
-      <form id="loginForm" onsubmit="return false;">
+      <form id="loginForm" onsubmit="return false;" autocomplete="off">
         <div class="form-group">
-          <label class="form-label">Username (Staff ID)</label>
-          <input type="text" class="form-input" id="username" placeholder="Enter your staff ID" required autocomplete="username">
+          <label class="form-label">Staff ID</label>
+          <input type="text" class="form-input" id="username" placeholder="Enter your Staff ID" required autocomplete="username">
         </div>
         
         <div class="form-group">
           <label class="form-label">Password</label>
           <div class="password-container">
             <input type="password" class="form-input" id="password" placeholder="Enter your password" required autocomplete="current-password">
-            <button type="button" class="toggle-password" onclick="togglePassword()">
+            <button type="button" class="toggle-password" onclick="togglePassword()" tabindex="-1">
               <span class="material-icons-round" id="toggleIcon">visibility_off</span>
             </button>
           </div>
         </div>
         
-        <div class="remember-me">
-          <input type="checkbox" id="rememberMe">
-          <label for="rememberMe">Remember me for 7 days</label>
-        </div>
-        
         <div class="error-message" id="errorMessage"></div>
         
-        <button class="login-button" onclick="login()">
-          Login
+        <button class="login-button" id="loginButton" onclick="login()">
+          <span class="button-text">Login</span>
         </button>
         
         <div class="forgot-password">
-          <a href="#" onclick="forgotPassword()">Forgot password? Contact Admin</a>
-        </div>
-        
-        <div class="biometric-login" id="biometricLogin" style="display: none;">
-          <button type="button" class="biometric-button" onclick="biometricLogin()">
-            <span class="material-icons-round">fingerprint</span>
-          </button>
-          <div class="biometric-label">Use biometric login</div>
+          <a href="#" onclick="forgotPassword()">Forgot password?</a>
         </div>
       </form>
     </div>
@@ -267,38 +270,16 @@
     // Check for saved credentials
     function checkSavedCredentials() {
       const savedUser = localStorage.getItem('trackmaster_user');
-      
       if (savedUser) {
         try {
           const userData = JSON.parse(savedUser);
-          const expiryTime = userData.expiry || 0;
-          
-          if (Date.now() < expiryTime) {
+          if (Date.now() < (userData.expiry || 0)) {
             window.location.href = 'index.html';
             return true;
-          } else {
-            localStorage.removeItem('trackmaster_user');
           }
-        } catch (e) {
-          console.error('Error parsing saved user:', e);
-        }
+        } catch (e) {}
       }
-      
-      // Auto-fill saved username
-      const savedUsername = localStorage.getItem('savedUsername');
-      if (savedUsername) {
-        document.getElementById('username').value = savedUsername;
-        document.getElementById('rememberMe').checked = true;
-      }
-      
       return false;
-    }
-    
-    // Check for biometric support
-    function checkBiometricSupport() {
-      if (window.PublicKeyCredential && localStorage.getItem('savedUsername')) {
-        document.getElementById('biometricLogin').style.display = 'block';
-      }
     }
     
     // Toggle password visibility
@@ -315,90 +296,53 @@
       }
     }
     
-// Login function with better error handling
-async function login() {
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value;
-  const rememberMe = document.getElementById('rememberMe').checked;
-  const errorElement = document.getElementById('errorMessage');
-  const loginButton = document.querySelector('.login-button');
-  
-  if (!username || !password) {
-    showError('Please enter both username and password');
-    return;
-  }
-  
-  // Disable button to prevent double submission
-  loginButton.disabled = true;
-  loginButton.textContent = 'Logging in...';
-  document.getElementById('loading').style.display = 'flex';
-  errorElement.style.display = 'none';
-  
-  try {
-    console.log('Attempting login for:', username);
-    
-    const result = await API.login(username, password);
-    console.log('Login result:', result);
-    
-    document.getElementById('loading').style.display = 'none';
-    loginButton.disabled = false;
-    loginButton.textContent = 'Login';
-    
-    if (result && result.success) {
-      const userData = {
-        ...result.user,
-        expiry: rememberMe ? Date.now() + (7 * 24 * 60 * 60 * 1000) : null
-      };
+    // Login function
+    async function login() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const loginButton = document.getElementById('loginButton');
+      const errorElement = document.getElementById('errorMessage');
       
-      if (rememberMe) {
-        localStorage.setItem('trackmaster_user', JSON.stringify(userData));
-        localStorage.setItem('savedUsername', username);
-      } else {
-        sessionStorage.setItem('trackmaster_session', JSON.stringify(result.user));
-      }
-      
-      showToast('Login successful! Redirecting...', 'success');
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 1000);
-    } else {
-      showError(result?.message || 'Invalid username or password');
-    }
-  } catch (error) {
-    console.error('Login error:', error);
-    document.getElementById('loading').style.display = 'none';
-    loginButton.disabled = false;
-    loginButton.textContent = 'Login';
-    showError('Connection error. Please check your internet and try again.');
-  }
-}    
-    // Biometric login
-    async function biometricLogin() {
-      if (!window.PublicKeyCredential) {
-        showError('Biometric authentication not supported');
+      if (!username || !password) {
+        showError('Please enter both Staff ID and password');
         return;
       }
       
+      // Show loading state
+      loginButton.classList.add('loading');
+      loginButton.disabled = true;
+      errorElement.style.display = 'none';
+      
       try {
-        const savedUser = localStorage.getItem('trackmaster_user');
+        const result = await API.login(username, password);
         
-        if (savedUser) {
-          showToast('Authenticating with biometrics...', 'info');
+        if (result.success) {
+          // Save user data
+          const userData = {
+            ...result.user,
+            expiry: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+          };
           
-          // Simulate biometric check (in real app, use WebAuthn API)
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          localStorage.setItem('trackmaster_user', JSON.stringify(userData));
           
-          const userData = JSON.parse(savedUser);
-          window.location.href = 'index.html';
+          showToast('Login successful! Redirecting...', 'success');
+          
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1000);
         } else {
-          showError('No saved credentials found');
+          loginButton.classList.remove('loading');
+          loginButton.disabled = false;
+          showError(result.message || 'Invalid credentials');
         }
       } catch (error) {
-        showError('Biometric authentication failed');
+        loginButton.classList.remove('loading');
+        loginButton.disabled = false;
+        showError('Connection error. Please try again.');
       }
     }
     
-    // Error handling
+    // Show error message
     function showError(message) {
       const errorElement = document.getElementById('errorMessage');
       errorElement.textContent = message;
@@ -410,19 +354,22 @@ async function login() {
       }, 500);
     }
     
+    // Show toast
     function showToast(message, type) {
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
       toast.textContent = message;
       
-      const container = document.getElementById('toastContainer');
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+      document.getElementById('toastContainer').appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
     }
     
     // Forgot password
     function forgotPassword() {
-      alert('Please contact your administrator to reset your password.');
+      showToast('Please contact your administrator', 'info');
     }
     
     // Enter key to submit
@@ -432,10 +379,9 @@ async function login() {
       }
     });
     
-    // Initialize on load
+    // Check saved credentials on load
     window.onload = function() {
       if (!checkSavedCredentials()) {
-        checkBiometricSupport();
         document.getElementById('username').focus();
       }
     };
