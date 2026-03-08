@@ -315,51 +315,63 @@
       }
     }
     
-    // Login function
-    async function login() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-      const rememberMe = document.getElementById('rememberMe').checked;
-      const errorElement = document.getElementById('errorMessage');
-      
-      if (!username || !password) {
-        showError('Please enter both username and password');
-        return;
-      }
-      
-      document.getElementById('loading').style.display = 'flex';
-      errorElement.style.display = 'none';
-      
-      try {
-        const result = await API.login(username, password);
-        document.getElementById('loading').style.display = 'none';
-        
-        if (result.success) {
-          const userData = {
-            ...result.user,
-            expiry: rememberMe ? Date.now() + (7 * 24 * 60 * 60 * 1000) : null
-          };
-          
-          if (rememberMe) {
-            localStorage.setItem('trackmaster_user', JSON.stringify(userData));
-            localStorage.setItem('savedUsername', username);
-          } else {
-            sessionStorage.setItem('trackmaster_session', JSON.stringify(result.user));
-          }
-          
-          showToast('Login successful! Redirecting...', 'success');
-          setTimeout(() => {
-            window.location.href = 'index.html';
-          }, 1000);
-        } else {
-          showError(result.message || 'Invalid credentials');
-        }
-      } catch (error) {
-        document.getElementById('loading').style.display = 'none';
-        showError('Connection error. Please check your internet and try again.');
-      }
-    }
+// Login function with better error handling
+async function login() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const rememberMe = document.getElementById('rememberMe').checked;
+  const errorElement = document.getElementById('errorMessage');
+  const loginButton = document.querySelector('.login-button');
+  
+  if (!username || !password) {
+    showError('Please enter both username and password');
+    return;
+  }
+  
+  // Disable button to prevent double submission
+  loginButton.disabled = true;
+  loginButton.textContent = 'Logging in...';
+  document.getElementById('loading').style.display = 'flex';
+  errorElement.style.display = 'none';
+  
+  try {
+    console.log('Attempting login for:', username);
     
+    const result = await API.login(username, password);
+    console.log('Login result:', result);
+    
+    document.getElementById('loading').style.display = 'none';
+    loginButton.disabled = false;
+    loginButton.textContent = 'Login';
+    
+    if (result && result.success) {
+      const userData = {
+        ...result.user,
+        expiry: rememberMe ? Date.now() + (7 * 24 * 60 * 60 * 1000) : null
+      };
+      
+      if (rememberMe) {
+        localStorage.setItem('trackmaster_user', JSON.stringify(userData));
+        localStorage.setItem('savedUsername', username);
+      } else {
+        sessionStorage.setItem('trackmaster_session', JSON.stringify(result.user));
+      }
+      
+      showToast('Login successful! Redirecting...', 'success');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1000);
+    } else {
+      showError(result?.message || 'Invalid username or password');
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    document.getElementById('loading').style.display = 'none';
+    loginButton.disabled = false;
+    loginButton.textContent = 'Login';
+    showError('Connection error. Please check your internet and try again.');
+  }
+}    
     // Biometric login
     async function biometricLogin() {
       if (!window.PublicKeyCredential) {
