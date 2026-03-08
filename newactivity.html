@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6750A4">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #6750A4;
+      --primary-container: #EADDFF;
+      --on-primary: #FFFFFF;
+      --surface: #FEF7FF;
+      --surface-container: #F3EDF7;
+      --on-surface: #1D1B20;
+      --outline: #79747E;
+      --error: #B3261E;
+      --success: #0D904F;
+      
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 999px;
+      
+      --spacing-sm: 8px;
+      --spacing-md: 12px;
+      --spacing-lg: 16px;
+      --spacing-xl: 24px;
+      
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--surface);
+      color: var(--on-surface);
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .app-bar {
+      background: var(--primary);
+      color: var(--on-primary);
+      padding: var(--spacing-md) var(--spacing-lg);
+      padding-top: calc(var(--spacing-md) + var(--safe-top));
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .app-title {
+      font-size: 20px;
+      font-weight: 600;
+    }
+    
+    .material-icons-round {
+      font-family: 'Material Icons Round';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+    }
+    
+    .icon-button {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      background: transparent;
+      border: none;
+      color: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .container {
+      height: calc(100vh - 64px - var(--safe-top));
+      overflow-y: auto;
+      padding: var(--spacing-lg);
+      padding-bottom: calc(var(--spacing-lg) + var(--safe-bottom));
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .form-card {
+      background: white;
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .form-group {
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: var(--spacing-sm);
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .form-label.required::after {
+      content: '*';
+      color: var(--error);
+      margin-left: 2px;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: var(--spacing-md);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius-sm);
+      font-size: 16px;
+      font-family: inherit;
+      background: white;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    textarea.form-input {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    /* Image Upload */
+    .image-upload-section {
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .image-upload-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-md);
+    }
+    
+    .image-upload-item {
+      aspect-ratio: 1;
+      border: 2px dashed var(--outline);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      background: var(--surface-container);
+    }
+    
+    .image-upload-item.add {
+      color: var(--outline);
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+    
+    .image-upload-item.add:active {
+      background: var(--surface);
+    }
+    
+    .image-preview {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .image-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-full);
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    /* Camera Modal */
+    .camera-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: black;
+      z-index: 1000;
+      display: none;
+    }
+    
+    .camera-preview {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .camera-controls {
+      position: absolute;
+      bottom: calc(var(--safe-bottom) + var(--spacing-xl));
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: var(--spacing-xl);
+    }
+    
+    .camera-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-full);
+      border: 4px solid white;
+      background: transparent;
+      cursor: pointer;
+    }
+    
+    .camera-btn.capture {
+      background: white;
+    }
+    
+    .camera-btn.close {
+      position: absolute;
+      top: calc(var(--safe-top) + var(--spacing-lg));
+      right: var(--spacing-lg);
+      width: 48px;
+      height: 48px;
+      border: none;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Location */
+    .location-section {
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .location-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-md);
+      padding: var(--spacing-md);
+      background: var(--surface-container);
+      border-radius: var(--radius-sm);
+    }
+    
+    .location-text {
+      flex: 1;
+      font-size: 14px;
+      color: var(--outline);
+    }
+    
+    /* Counter */
+    .counter-section {
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .counter-controls {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      margin-top: var(--spacing-md);
+    }
+    
+    .counter-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-full);
+      border: 2px solid var(--primary);
+      background: transparent;
+      color: var(--primary);
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .counter-value {
+      font-size: 24px;
+      font-weight: 600;
+      min-width: 60px;
+      text-align: center;
+    }
+    
+    /* Buttons */
+    .button-group {
+      display: flex;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-xl);
+    }
+    
+    .btn {
+      flex: 1;
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+    
+    .btn-secondary {
+      background: var(--surface-container);
+      color: var(--on-surface);
+    }
+    
+    /* Loading */
+    .loading {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+    
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: var(--radius-full);
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: calc(80px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--on-surface);
+      color: var(--surface);
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: var(--radius-full);
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 1000;
+      animation: slideUp 0.3s ease;
+      display: none;
+    }
+    
+    .toast.error {
+      background: var(--error);
+    }
+    
+    .toast.success {
+      background: var(--success);
+    }
+    
+    @keyframes slideUp {
+      from {
+        transform: translateX(-50%) translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="app-title">New Activity</div>
+    <button class="icon-button" onclick="goBack()">
+      <span class="material-icons-round">close</span>
+    </button>
+  </div>
+  
+  <!-- Main Form -->
+  <div class="container">
+    <div class="form-card">
+      <div class="form-group">
+        <label class="form-label required">Date of Activity</label>
+        <input type="date" class="form-input" id="activityDate" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label required">Activity Type</label>
+        <select class="form-input" id="activityType" required>
+          <option value="">Select activity type</option>
+          <option value="FHTC Feeding">FHTC Feeding</option>
+          <option value="Verification">Verification</option>
+          <option value="Meeting">Meeting</option>
+          <option value="Field Work">Field Work</option>
+          <option value="Reporting">Reporting</option>
+          <option value="Training">Training</option>
+          <option value="Holiday">Holiday</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Block Name</label>
+        <input type="text" class="form-input" id="blockName" placeholder="Enter block name">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label required">Description of Activity</label>
+        <textarea class="form-input" id="description" placeholder="Describe your activity..." required></textarea>
+      </div>
+      
+      <!-- FHTC Counter -->
+      <div class="counter-section" id="fhtcSection" style="display: none;">
+        <label class="form-label">FHTC Feeding Count</label>
+        <div class="counter-controls">
+          <button class="counter-btn" onclick="updateCount(-1)">-</button>
+          <span class="counter-value" id="countValue">0</span>
+          <button class="counter-btn" onclick="updateCount(1)">+</button>
+        </div>
+      </div>
+      
+      <!-- Location -->
+      <div class="location-section">
+        <label class="form-label">Location</label>
+        <button class="btn btn-secondary" onclick="getLocation()" type="button" style="width: 100%; margin-top: var(--spacing-md);">
+          <span class="material-icons-round">location_on</span>
+          Get Current Location
+        </button>
+        <div class="location-info" id="locationInfo" style="display: none;">
+          <span class="material-icons-round" style="color: var(--primary);">location_on</span>
+          <div class="location-text" id="locationText"></div>
+          <button class="icon-button" onclick="clearLocation()">
+            <span class="material-icons-round">close</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Images -->
+      <div class="image-upload-section">
+        <label class="form-label">Activity Images</label>
+        <div class="image-upload-grid" id="imageGrid">
+          <div class="image-upload-item add" onclick="openImageSource()">
+            <span class="material-icons-round">add_photo_alternate</span>
+            <span style="font-size: 12px;">Add Photo</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Activity By</label>
+        <input type="text" class="form-input" id="activityBy" readonly>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="button-group">
+        <button class="btn btn-secondary" onclick="cancelActivity()">
+          Cancel
+        </button>
+        <button class="btn btn-primary" onclick="saveActivity()">
+          <span class="material-icons-round">save</span>
+          Save Activity
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Camera Modal -->
+  <div class="camera-modal" id="cameraModal">
+    <video class="camera-preview" id="cameraPreview"></video>
+    <button class="camera-btn close" onclick="closeCamera()">
+      <span class="material-icons-round">close</span>
+    </button>
+    <div class="camera-controls">
+      <button class="camera-btn capture" onclick="capturePhoto()"></button>
+    </div>
+  </div>
+  
+  <!-- Loading Overlay -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div>Saving activity...</div>
+  </div>
+  
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+  
+  <script>
+    // App State
+    const state = {
+      images: [],
+      fhtcCount: 0,
+      location: null,
+      isOnline: navigator.onLine,
+      stream: null,
+      currentUser: null
+    };
+    
+    // Initialize
+    async function init() {
+      // Set current date
+      const today = new Date();
+      const formattedDate = today.toISOString().split('T')[0];
+      document.getElementById('activityDate').value = formattedDate;
+      
+      // Get current user
+      state.currentUser = await google.script.run
+        .withFailureHandler(showError)
+        .getCurrentUser();
+      
+      if (state.currentUser) {
+        document.getElementById('activityBy').value = state.currentUser.name;
+      }
+      
+      // Listen for FHTC selection
+      document.getElementById('activityType').addEventListener('change', function() {
+        const fhtcSection = document.getElementById('fhtcSection');
+        fhtcSection.style.display = this.value === 'FHTC Feeding' ? 'block' : 'none';
+      });
+      
+      // Network status
+      window.addEventListener('online', () => {
+        state.isOnline = true;
+      });
+      
+      window.addEventListener('offline', () => {
+        state.isOnline = false;
+        showToast('You are offline. Activity will be saved locally.', 'warning');
+      });
+    }
+    
+    // Image Management
+    function openImageSource() {
+      if (state.images.length >= 6) {
+        showToast('Maximum 6 images allowed', 'error');
+        return;
+      }
+      
+      // Check if mobile
+      if (isMobile()) {
+        const source = confirm('Take photo or choose from gallery?\n\nOK for Camera\nCancel for Gallery');
+        if (source) {
+          openCamera();
+        } else {
+          openGallery();
+        }
+      } else {
+        openGallery();
+      }
+    }
+    
+    function openCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('Camera not available', 'error');
+        openGallery();
+        return;
+      }
+      
+      const modal = document.getElementById('cameraModal');
+      const preview = document.getElementById('cameraPreview');
+      
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          state.stream = stream;
+          preview.srcObject = stream;
+          modal.style.display = 'block';
+        })
+        .catch(error => {
+          console.error('Camera error:', error);
+          showToast('Camera access denied', 'error');
+          openGallery();
+        });
+    }
+    
+    function closeCamera() {
+      const modal = document.getElementById('cameraModal');
+      const preview = document.getElementById('cameraPreview');
+      
+      if (state.stream) {
+        state.stream.getTracks().forEach(track => track.stop());
+        state.stream = null;
+      }
+      
+      preview.srcObject = null;
+      modal.style.display = 'none';
+    }
+    
+    function capturePhoto() {
+      const preview = document.getElementById('cameraPreview');
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      
+      canvas.width = preview.videoWidth;
+      canvas.height = preview.videoHeight;
+      context.drawImage(preview, 0, 0, canvas.width, canvas.height);
+      
+      canvas.toBlob(blob => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          addImage(e.target.result);
+          closeCamera();
+        };
+        reader.readAsDataURL(blob);
+      }, 'image/jpeg', 0.8);
+    }
+    
+    function openGallery() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.multiple = true;
+      input.capture = 'environment';
+      
+      input.onchange = function(e) {
+        const files = Array.from(e.target.files);
+        if (state.images.length + files.length > 6) {
+          showToast('Maximum 6 images allowed', 'error');
+          return;
+        }
+        
+        files.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            addImage(e.target.result);
+          };
+          reader.readAsDataURL(file);
+        });
+      };
+      
+      input.click();
+    }
+    
+    function addImage(dataUrl) {
+      state.images.push(dataUrl);
+      updateImageGrid();
+    }
+    
+    function removeImage(index) {
+      state.images.splice(index, 1);
+      updateImageGrid();
+    }
+    
+    function updateImageGrid() {
+      const grid = document.getElementById('imageGrid');
+      grid.innerHTML = '';
+      
+      // Add image previews
+      state.images.forEach((image, index) => {
+        const item = document.createElement('div');
+        item.className = 'image-upload-item';
+        item.innerHTML = `
+          <img src="${image}" class="image-preview" alt="Activity image">
+          <button class="image-remove" onclick="removeImage(${index})">
+            <span class="material-icons-round">close</span>
+          </button>
+        `;
+        grid.appendChild(item);
+      });
+      
+      // Add add button if less than 6 images
+      if (state.images.length < 6) {
+        const addButton = document.createElement('div');
+        addButton.className = 'image-upload-item add';
+        addButton.onclick = openImageSource;
+        addButton.innerHTML = `
+          <span class="material-icons-round">add_photo_alternate</span>
+          <span style="font-size: 12px;">Add Photo</span>
+        `;
+        grid.appendChild(addButton);
+      }
+    }
+    
+    // Location
+    function getLocation() {
+      if (!navigator.geolocation) {
+        showToast('Geolocation not supported', 'error');
+        return;
+      }
+      
+      showToast('Getting location...', 'info');
+      
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          state.location = { latitude, longitude };
+          
+          try {
+            // Reverse geocode to get address
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+            );
+            const data = await response.json();
+            
+            const address = data.display_name || `Lat: ${latitude.toFixed(6)}, Lon: ${longitude.toFixed(6)}`;
+            document.getElementById('locationText').textContent = address;
+            document.getElementById('locationInfo').style.display = 'flex';
+            
+            showToast('Location captured', 'success');
+          } catch (error) {
+            document.getElementById('locationText').textContent = 
+              `Lat: ${latitude.toFixed(6)}, Lon: ${longitude.toFixed(6)}`;
+            document.getElementById('locationInfo').style.display = 'flex';
+            showToast('Location captured', 'success');
+          }
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          showToast('Failed to get location: ' + error.message, 'error');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
+    
+    function clearLocation() {
+      state.location = null;
+      document.getElementById('locationInfo').style.display = 'none';
+    }
+    
+    // FHTC Counter
+    function updateCount(delta) {
+      state.fhtcCount = Math.max(0, state.fhtcCount + delta);
+      document.getElementById('countValue').textContent = state.fhtcCount;
+    }
+    
+    // Save Activity
+    async function saveActivity() {
+      // Validate
+      const date = document.getElementById('activityDate').value;
+      const type = document.getElementById('activityType').value;
+      const description = document.getElementById('description').value;
+      
+      if (!date || !type || !description) {
+        showToast('Please fill all required fields', 'error');
+        return;
+      }
+      
+      // Prepare data
+      const activityData = {
+        date: date,
+        activityType: type,
+        description: description,
+        blockName: document.getElementById('blockName').value,
+        fhtcCount: state.fhtcCount,
+        images: state.images,
+        location: state.location
+      };
+      
+      // Show loading
+      document.getElementById('loading').style.display = 'flex';
+      
+      try {
+        if (state.isOnline) {
+          // Save online
+          const result = await google.script.run
+            .withFailureHandler(handleSaveError)
+            .saveActivity(activityData);
+          
+          if (result.success) {
+            showToast('Activity saved successfully!', 'success');
+            setTimeout(() => {
+              window.location.href = '<?= appUrl ?>?path=home';
+            }, 1500);
+          }
+        } else {
+          // Save offline
+          saveOffline(activityData);
+          showToast('Activity saved offline. Will sync when online.', 'success');
+          setTimeout(() => {
+            window.location.href = '<?= appUrl ?>?path=home';
+          }, 1500);
+        }
+      } catch (error) {
+        handleSaveError(error);
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+    
+    function saveOffline(activityData) {
+      // Save to localStorage
+      const offlineActivities = JSON.parse(localStorage.getItem('offlineActivities') || '[]');
+      const offlineActivity = {
+        id: 'offline-' + Date.now(),
+        timestamp: new Date().toISOString(),
+        ...activityData
+      };
+      
+      offlineActivities.push(offlineActivity);
+      localStorage.setItem('offlineActivities', JSON.stringify(offlineActivities));
+      
+      // Register background sync
+      if ('serviceWorker' in navigator && 'SyncManager' in window) {
+        navigator.serviceWorker.ready.then(registration => {
+          registration.sync.register('sync-activities');
+        });
+      }
+    }
+    
+    function handleSaveError(error) {
+      console.error('Save error:', error);
+      showToast('Failed to save activity: ' + error, 'error');
+    }
+    
+    // Utility Functions
+    function isMobile() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+    
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type}`;
+      toast.style.display = 'block';
+      
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+    
+    function showError(error) {
+      console.error('Error:', error);
+      showToast('Error: ' + error, 'error');
+    }
+    
+    function goBack() {
+      if (confirm('Are you sure you want to cancel? Unsaved changes will be lost.')) {
+        window.history.back();
+      }
+    }
+    
+    function cancelActivity() {
+      goBack();
+    }
+    
+    // Initialize on load
+    window.onload = init;
+  </script>
+</body>
+</html>

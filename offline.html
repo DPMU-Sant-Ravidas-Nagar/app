@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #FEF7FF;
+      color: #1D1B20;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .offline-icon {
+      font-size: 64px;
+      color: #79747E;
+      margin-bottom: 24px;
+    }
+    
+    h1 {
+      color: #6750A4;
+      margin-bottom: 16px;
+    }
+    
+    p {
+      color: #79747E;
+      margin-bottom: 24px;
+      max-width: 300px;
+    }
+    
+    .retry-btn {
+      background: #6750A4;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .retry-btn:hover {
+      background: #5A4790;
+    }
+  </style>
+</head>
+<body>
+  <div class="material-icons-round offline-icon">cloud_off</div>
+  <h1>You're Offline</h1>
+  <p>Please check your internet connection and try again.</p>
+  <button class="retry-btn" onclick="window.location.reload()">Retry</button>
+  
+  <script>
+    // Check connection periodically
+    setInterval(() => {
+      if (navigator.onLine) {
+        window.location.href = '/';
+      }
+    }, 3000);
+  </script>
+</body>
+</html>
