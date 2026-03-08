@@ -8,9 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="api.js"></script>
   
   <style>
-    /* New Activity specific styles */
     .container {
       height: calc(100vh - 64px - var(--safe-top));
       overflow-y: auto;
@@ -180,10 +180,99 @@
       text-align: center;
     }
     
+    .team-selection {
+      margin-top: var(--spacing-md);
+    }
+    
+    .selected-team {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-md);
+    }
+    
+    .team-chip {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+    
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 400px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .modal-header {
+      padding: var(--spacing-lg);
+      border-bottom: 1px solid var(--outline);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-body {
+      padding: var(--spacing-lg);
+      overflow-y: auto;
+    }
+    
+    .modal-footer {
+      padding: var(--spacing-lg);
+      border-top: 1px solid var(--outline);
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .team-checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      border-bottom: 1px solid var(--outline);
+      cursor: pointer;
+    }
+    
+    .team-checkbox-item:hover {
+      background: var(--surface-container);
+    }
+    
+    .team-checkbox-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+    }
+    
     .button-group {
       display: flex;
       gap: var(--spacing-md);
       margin-top: var(--spacing-xl);
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      .modal-content {
+        background: #2D2B30;
+      }
     }
   </style>
 </head>
@@ -226,7 +315,19 @@
       
       <div class="form-group">
         <label class="form-label required">Description of Activity</label>
-        <textarea class="form-input" id="description" placeholder="Describe your activity..." required></textarea>
+        <textarea class="form-input" id="description" placeholder="Describe your activity..." rows="3" required></textarea>
+      </div>
+      
+      <!-- Team Members Selection -->
+      <div class="form-group">
+        <label class="form-label">Activity Team Members</label>
+        <div class="team-selection">
+          <button class="btn btn-secondary" onclick="showTeamSelector()" type="button" style="width: 100%;">
+            <span class="material-icons-round">group_add</span>
+            Select Team Members
+          </button>
+        </div>
+        <div class="selected-team" id="selectedTeam" style="display: none;"></div>
       </div>
       
       <!-- FHTC Counter -->
@@ -286,12 +387,30 @@
   
   <!-- Camera Modal -->
   <div class="camera-modal" id="cameraModal">
-    <video class="camera-preview" id="cameraPreview"></video>
+    <video class="camera-preview" id="cameraPreview" autoplay playsinline></video>
     <button class="camera-btn close" onclick="closeCamera()">
       <span class="material-icons-round">close</span>
     </button>
     <div class="camera-controls">
       <button class="camera-btn capture" onclick="capturePhoto()"></button>
+    </div>
+  </div>
+  
+  <!-- Team Selection Modal -->
+  <div class="modal" id="teamModal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Select Team Members</h3>
+        <button class="icon-button" onclick="closeTeamModal()">
+          <span class="material-icons-round">close</span>
+        </button>
+      </div>
+      <div class="modal-body" id="teamList">
+        <div style="text-align: center; padding: 20px;">Loading team members...</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="confirmTeamSelection()">Done</button>
+      </div>
     </div>
   </div>
   
@@ -302,7 +421,7 @@
   </div>
   
   <!-- Toast Container -->
-  <div class="toast-container"></div>
+  <div class="toast-container" id="toastContainer"></div>
   
   <script>
     // App State
@@ -312,12 +431,14 @@
       location: null,
       isOnline: navigator.onLine,
       stream: null,
-      currentUser: null
+      currentUser: null,
+      selectedTeamMembers: [],
+      allTeamMembers: []
     };
     
     // Initialize
-    function init() {
-      // Check authentication
+    async function init() {
+      // Get current user
       const savedUser = localStorage.getItem('trackmaster_user');
       const sessionUser = sessionStorage.getItem('trackmaster_session');
       
@@ -340,11 +461,24 @@
         return;
       }
       
+      // Set current user as default team member
+      state.selectedTeamMembers = [state.currentUser.staffId];
+      
       // Set current date
       const today = new Date();
       const formattedDate = today.toISOString().split('T')[0];
       document.getElementById('activityDate').value = formattedDate;
       document.getElementById('activityBy').value = state.currentUser.name || 'Current User';
+      
+      // Load team members for selection
+      await loadTeamMembers();
+      
+      // Check if editing existing activity
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get('edit');
+      if (editId) {
+        await loadActivityForEdit(editId);
+      }
       
       // Listen for FHTC selection
       document.getElementById('activityType').addEventListener('change', function() {
@@ -355,42 +489,310 @@
       // Network status
       window.addEventListener('online', () => {
         state.isOnline = true;
+        showToast('You are back online!', 'success');
       });
       
       window.addEventListener('offline', () => {
         state.isOnline = false;
-        showToast('You are offline. Activity will be saved locally.', 'warning');
+        showToast('You are offline. Activity will be saved when online.', 'warning');
       });
     }
     
-    // Keep all other functions from your existing newactivity.html
-    // (openImageSource, openCamera, closeCamera, capturePhoto, etc.)
+    // Load team members
+    async function loadTeamMembers() {
+      try {
+        const result = await API.getTeamMembers();
+        if (result.success) {
+          state.allTeamMembers = result.members;
+        }
+      } catch (error) {
+        console.error('Error loading team members:', error);
+      }
+    }
     
-    function showToast(message, type) {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = message;
+    // Show team selector
+    function showTeamSelector() {
+      const modal = document.getElementById('teamModal');
+      const teamList = document.getElementById('teamList');
       
-      const container = document.querySelector('.toast-container');
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+      if (state.allTeamMembers.length > 0) {
+        teamList.innerHTML = state.allTeamMembers.map(member => `
+          <div class="team-checkbox-item" onclick="toggleMember('${member.staffId}')">
+            <input type="checkbox" 
+                   id="member_${member.staffId}" 
+                   value="${member.staffId}"
+                   ${state.selectedTeamMembers.includes(member.staffId) ? 'checked' : ''}>
+            <label for="member_${member.staffId}">
+              <strong>${member.name}</strong><br>
+              <small>${member.designation || 'Team Member'}</small>
+            </label>
+          </div>
+        `).join('');
+      }
+      
+      modal.style.display = 'flex';
     }
     
-    function goBack() {
-      window.location.href = 'index.html';
+    // Toggle member selection
+    function toggleMember(staffId) {
+      const checkbox = document.getElementById(`member_${staffId}`);
+      checkbox.checked = !checkbox.checked;
     }
     
+    // Confirm team selection
+    function confirmTeamSelection() {
+      const checkboxes = document.querySelectorAll('#teamList input[type="checkbox"]:checked');
+      state.selectedTeamMembers = Array.from(checkboxes).map(cb => cb.value);
+      
+      // Update display
+      const selectedTeamDiv = document.getElementById('selectedTeam');
+      if (state.selectedTeamMembers.length > 1) {
+        const selectedNames = state.allTeamMembers
+          .filter(m => state.selectedTeamMembers.includes(m.staffId))
+          .map(m => m.name.split(' ')[0]);
+        
+        selectedTeamDiv.innerHTML = selectedNames.map(name => `
+          <span class="team-chip">
+            ${name}
+          </span>
+        `).join('');
+        selectedTeamDiv.style.display = 'flex';
+      } else {
+        selectedTeamDiv.style.display = 'none';
+      }
+      
+      closeTeamModal();
+    }
+    
+    // Close team modal
+    function closeTeamModal() {
+      document.getElementById('teamModal').style.display = 'none';
+    }
+    
+    // Update counter
+    function updateCount(delta) {
+      state.fhtcCount = Math.max(0, state.fhtcCount + delta);
+      document.getElementById('countValue').textContent = state.fhtcCount;
+    }
+    
+    // Image handling
+    function openImageSource() {
+      if (state.images.length >= 6) {
+        showToast('Maximum 6 images allowed', 'warning');
+        return;
+      }
+      
+      if (confirm('Take photo or choose from gallery?')) {
+        openCamera();
+      } else {
+        selectFromGallery();
+      }
+    }
+    
+    function openCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('Camera not supported', 'error');
+        return;
+      }
+      
+      document.getElementById('cameraModal').style.display = 'block';
+      
+      navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' }, 
+        audio: false 
+      })
+      .then(stream => {
+        state.stream = stream;
+        document.getElementById('cameraPreview').srcObject = stream;
+      })
+      .catch(err => {
+        showToast('Could not access camera', 'error');
+        closeCamera();
+      });
+    }
+    
+    function closeCamera() {
+      if (state.stream) {
+        state.stream.getTracks().forEach(track => track.stop());
+        state.stream = null;
+      }
+      document.getElementById('cameraModal').style.display = 'none';
+    }
+    
+    function capturePhoto() {
+      const video = document.getElementById('cameraPreview');
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      const imageData = canvas.toDataURL('image/jpeg');
+      
+      addImage(imageData);
+      closeCamera();
+    }
+    
+    function selectFromGallery() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.multiple = true;
+      
+      input.onchange = (e) => {
+        const files = Array.from(e.target.files);
+        files.forEach(file => {
+          if (state.images.length >= 6) return;
+          
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            addImage(event.target.result);
+          };
+          reader.readAsDataURL(file);
+        });
+      };
+      
+      input.click();
+    }
+    
+    function addImage(imageData) {
+      if (state.images.length >= 6) {
+        showToast('Maximum 6 images allowed', 'warning');
+        return;
+      }
+      
+      state.images.push(imageData);
+      renderImageGrid();
+    }
+    
+    function removeImage(index) {
+      state.images.splice(index, 1);
+      renderImageGrid();
+    }
+    
+    function renderImageGrid() {
+      const grid = document.getElementById('imageGrid');
+      let html = '';
+      
+      state.images.forEach((img, index) => {
+        html += `
+          <div class="image-upload-item">
+            <img src="${img}" class="image-preview" alt="Preview">
+            <button class="image-remove" onclick="removeImage(${index})">
+              <span class="material-icons-round" style="font-size: 16px;">close</span>
+            </button>
+          </div>
+        `;
+      });
+      
+      if (state.images.length < 6) {
+        html += `
+          <div class="image-upload-item add" onclick="openImageSource()">
+            <span class="material-icons-round">add_photo_alternate</span>
+            <span style="font-size: 12px;">Add Photo</span>
+          </div>
+        `;
+      }
+      
+      grid.innerHTML = html;
+    }
+    
+    // Location handling
+    function getLocation() {
+      if (!navigator.geolocation) {
+        showToast('Geolocation not supported', 'error');
+        return;
+      }
+      
+      showToast('Getting location...', 'info');
+      
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          state.location = `${position.coords.latitude},${position.coords.longitude}`;
+          document.getElementById('locationText').textContent = 
+            `Lat: ${position.coords.latitude.toFixed(6)}, Lng: ${position.coords.longitude.toFixed(6)}`;
+          document.getElementById('locationInfo').style.display = 'flex';
+        },
+        (error) => {
+          showToast('Could not get location', 'error');
+        }
+      );
+    }
+    
+    function clearLocation() {
+      state.location = null;
+      document.getElementById('locationInfo').style.display = 'none';
+    }
+    
+    // Save activity
+    async function saveActivity() {
+      // Validate form
+      const date = document.getElementById('activityDate').value;
+      const type = document.getElementById('activityType').value;
+      const description = document.getElementById('description').value;
+      
+      if (!date || !type || !description) {
+        showToast('Please fill all required fields', 'error');
+        return;
+      }
+      
+      const activityData = {
+        date: date,
+        type: type,
+        description: description,
+        blockName: document.getElementById('blockName').value,
+        images: state.images,
+        location: state.location,
+        teamMembers: state.selectedTeamMembers,
+        submittedBy: state.currentUser.staffId,
+        fhtcCount: type === 'FHTC Feeding' ? state.fhtcCount : 0
+      };
+      
+      document.getElementById('loading').style.display = 'flex';
+      
+      try {
+        const result = await API.saveActivity(activityData);
+        document.getElementById('loading').style.display = 'none';
+        
+        if (result.success) {
+          if (result.pendingApprovals) {
+            showToast('Activity saved and sent for team approval', 'success');
+          } else {
+            showToast('Activity saved successfully!', 'success');
+          }
+          
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
+        } else {
+          showToast(result.message || 'Error saving activity', 'error');
+        }
+      } catch (error) {
+        document.getElementById('loading').style.display = 'none';
+        showToast('Error saving activity. Please try again.', 'error');
+      }
+    }
+    
+    // Cancel
     function cancelActivity() {
       if (confirm('Are you sure you want to cancel? Unsaved changes will be lost.')) {
         window.location.href = 'index.html';
       }
     }
     
-    function saveActivity() {
-      showToast('Activity saved successfully!', 'success');
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 1500);
+    // Go back
+    function goBack() {
+      cancelActivity();
+    }
+    
+    // Show toast
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      
+      const container = document.getElementById('toastContainer');
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
     }
     
     // Initialize on load
