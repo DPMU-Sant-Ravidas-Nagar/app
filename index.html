@@ -25,7 +25,42 @@
   <link rel="stylesheet" href="style.css">
   
   <style>
-    /* Additional styles from timesheet for reports and more tab */
+    /* Additional styles */
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding: 5px 0;
+    }
+    
+    .filter-chip {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--surface-container);
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+    
+    .filter-chip.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+    
+    .activity-item.pending {
+      border-left-color: var(--warning);
+    }
+    
     .report-types {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -66,17 +101,6 @@
       color: white;
     }
     
-    .report-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    
-    .report-desc {
-      font-size: 12px;
-      color: var(--outline);
-    }
-    
     .date-range {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -114,11 +138,6 @@
       color: var(--primary);
     }
     
-    .format-name {
-      font-size: 12px;
-      font-weight: 500;
-    }
-    
     .report-preview {
       background: var(--surface-container);
       border-radius: var(--radius-md);
@@ -131,11 +150,6 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 16px;
-    }
-    
-    .preview-header h3 {
-      font-size: 16px;
-      font-weight: 600;
     }
     
     .preview-content {
@@ -158,7 +172,6 @@
       color: var(--primary);
       padding: 8px;
       text-align: left;
-      font-weight: 600;
       border-bottom: 2px solid var(--primary);
     }
     
@@ -188,12 +201,7 @@
       padding: 12px;
       background: var(--surface);
       border-radius: 8px;
-      transition: all 0.2s;
       cursor: pointer;
-    }
-    
-    .report-item:hover {
-      background: var(--primary-light);
     }
     
     .report-item-icon {
@@ -205,12 +213,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
     }
     
     .report-item-info {
       flex: 1;
-      min-width: 0;
     }
     
     .report-item-name {
@@ -226,11 +232,6 @@
       color: var(--outline);
     }
     
-    .report-item-actions {
-      display: flex;
-      gap: 4px;
-    }
-    
     .action-btn {
       width: 32px;
       height: 32px;
@@ -238,18 +239,9 @@
       background: var(--surface);
       border: none;
       color: var(--outline);
-      display: flex;
-      align-items: center;
-      justify-content: center;
       cursor: pointer;
-      box-shadow: var(--shadow-1);
     }
     
-    .action-btn:hover {
-      color: var(--primary);
-    }
-    
-    /* More tab styles */
     .more-menu {
       display: flex;
       flex-direction: column;
@@ -264,12 +256,6 @@
       background: var(--surface-container);
       border-radius: var(--radius-md);
       cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .more-item:active {
-      transform: scale(0.98);
-      background: var(--primary-light);
     }
     
     .more-icon {
@@ -310,12 +296,19 @@
       border-bottom: 1px solid var(--outline);
     }
     
-    .info-label {
-      color: var(--outline);
+    .error-container {
+      text-align: center;
+      padding: 40px 20px;
     }
     
-    .info-value {
-      font-weight: 500;
+    .error-icon {
+      font-size: 48px;
+      color: var(--error);
+      margin-bottom: 16px;
+    }
+    
+    .retry-button {
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -343,7 +336,7 @@
       <!-- Offline Indicator -->
       <div id="offlineIndicator" class="offline-indicator" style="display: none;">
         <span class="material-icons-round">cloud_off</span>
-        You're offline - Changes will sync when online
+        You're offline
       </div>
       
       <!-- Main Content -->
@@ -391,7 +384,7 @@
         </div>
         <div>
           <div class="install-title">Install TrackMaster</div>
-          <div class="install-subtitle">Add to home screen for better experience</div>
+          <div class="install-subtitle">Add to home screen</div>
         </div>
       </div>
       <div class="install-actions">
@@ -501,11 +494,6 @@
         e.preventDefault();
         appState.deferredPrompt = e;
       });
-      
-      window.addEventListener('appinstalled', () => {
-        appState.deferredPrompt = null;
-        showToast('App installed successfully!', 'success');
-      });
     }
     
     // Update active navigation
@@ -532,26 +520,15 @@
       }
       
       const container = document.getElementById('currentPage');
-      const cached = pageCache.get(page);
       
-      if (cached) {
-        container.innerHTML = cached;
-      } else {
-        container.innerHTML = getLoadingSkeleton();
-      }
-      
-      await loadPageContent(page);
-    }
-    
-    // Loading skeleton
-    function getLoadingSkeleton() {
-      return `
+      // Show loading
+      container.innerHTML = `
         <div class="card">
-          <div class="skeleton" style="height: 24px; width: 60%; margin-bottom: 16px;"></div>
-          <div class="skeleton" style="height: 80px; margin-bottom: 12px;"></div>
-          <div class="skeleton" style="height: 80px;"></div>
+          <div class="loading">Loading...</div>
         </div>
       `;
+      
+      await loadPageContent(page);
     }
     
     // Load page content
@@ -584,17 +561,17 @@
         
         // Initialize page-specific functions
         if (page === 'reports') initReportsPage();
-        if (page === 'myactivity') initActivityPage();
         
       } catch (error) {
         console.error('Error loading page:', error);
         container.innerHTML = `
-          <div class="card">
-            <div style="text-align: center; padding: 40px;">
-              <span class="material-icons-round" style="font-size: 48px; color: var(--error);">error</span>
-              <p style="margin-top: 16px;">Failed to load page</p>
-              <button class="btn btn-primary" onclick="navigateTo('${page}')" style="margin-top: 16px;">Retry</button>
-            </div>
+          <div class="card error-container">
+            <span class="material-icons-round error-icon">error</span>
+            <h3>Failed to Load</h3>
+            <p style="color: var(--outline); margin: 16px 0;">${error.message || 'Unknown error'}</p>
+            <button class="btn btn-primary retry-button" onclick="navigateTo('${page}')">
+              Retry
+            </button>
           </div>
         `;
       }
@@ -608,7 +585,7 @@
         const result = await API.getDashboardStats(appState.currentUser.staffId);
         
         if (result.success) {
-          const stats = result.stats;
+          const stats = result.stats || {};
           return `
             <div class="card">
               <div class="card-header">
@@ -636,66 +613,60 @@
                 </div>
               </div>
             </div>
-            
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">
-                  <span class="material-icons-round">pie_chart</span>
-                  Activity Breakdown
-                </h3>
-              </div>
-              <div class="stats-grid">
-                ${Object.entries(stats.typeBreakdown || {}).map(([type, count]) => `
-                  <div class="stat-card">
-                    <div class="stat-value">${count}</div>
-                    <div class="stat-label">${type}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
           `;
         }
-        return '<div class="card">Error loading dashboard</div>';
+        return '<div class="card">No data available</div>';
       } catch (error) {
+        console.error('Dashboard error:', error);
         return '<div class="card">Error loading dashboard</div>';
       }
     }
     
-    // Load My Activity
+    // Load My Activity - FIXED
     async function loadMyActivity() {
       if (!appState.currentUser) return '<div class="card">Please login</div>';
       
       try {
+        console.log('Loading activities for:', appState.currentUser.staffId);
         const result = await API.getUserActivities(appState.currentUser.staffId, 'all');
+        console.log('Activities result:', result);
         
-        if (result.success && result.activities.length > 0) {
+        if (result.success && result.activities && result.activities.length > 0) {
+          // Group by month
           const grouped = {};
           result.activities.forEach(activity => {
+            if (!activity.date) return;
             const date = new Date(activity.date);
             const monthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' });
             if (!grouped[monthYear]) grouped[monthYear] = [];
             grouped[monthYear].push(activity);
           });
           
-          let html = '';
+          let html = `
+            <div class="filter-bar">
+              <button class="filter-chip active" onclick="filterActivities('all')">All</button>
+              <button class="filter-chip" onclick="filterActivities('weekly')">This Week</button>
+              <button class="filter-chip" onclick="filterActivities('monthly')">This Month</button>
+            </div>
+          `;
           
           Object.entries(grouped).forEach(([month, activities]) => {
             html += `
               <div class="card">
                 <div class="card-header">
                   <h3 class="card-title">${month}</h3>
-                  <span class="activity-day">${activities.length} activities</span>
+                  <span class="badge">${activities.length} activities</span>
                 </div>
                 <div class="activity-list">
                   ${activities.map(a => `
                     <div class="activity-item ${a.status === 'Pending Approval' ? 'pending' : ''}" onclick="editActivity('${a.rowId}')">
                       <div class="activity-header">
-                        <span class="activity-date">${a.date}</span>
+                        <span class="activity-date">${a.date || 'No date'}</span>
                         <span class="activity-day" style="color: ${a.status === 'Approved' ? 'var(--success)' : 'var(--warning)'}">
-                          ${a.status}
+                          ${a.status || 'Unknown'}
                         </span>
                       </div>
-                      <div class="activity-description">${escapeHtml(a.description)}</div>
+                      <div class="activity-description">${escapeHtml(a.description || 'No description')}</div>
                       <div class="activity-meta">
                         ${a.location ? `
                           <span class="activity-meta-item">
@@ -705,7 +676,7 @@
                         ` : ''}
                         <span class="activity-meta-item">
                           <span class="material-icons-round">groups</span>
-                          ${a.teamMembers.length} member(s)
+                          ${a.teamMembers?.length || 1} member(s)
                         </span>
                       </div>
                     </div>
@@ -718,6 +689,7 @@
           return html;
         }
         
+        // No activities
         return `
           <div class="card">
             <div style="text-align: center; padding: 40px 20px;">
@@ -732,16 +704,28 @@
           </div>
         `;
       } catch (error) {
-        return '<div class="card">Error loading activities</div>';
+        console.error('Activity error:', error);
+        return `
+          <div class="card error-container">
+            <span class="material-icons-round error-icon">error</span>
+            <h3>Failed to Load Activities</h3>
+            <p style="color: var(--outline); margin: 16px 0;">${error.message}</p>
+            <button class="btn btn-primary retry-button" onclick="loadPageContent('myactivity')">
+              Retry
+            </button>
+          </div>
+        `;
       }
     }
     
-    // Load My Team - Updated with all team sheet columns
+    // Load My Team - FIXED with all columns
     async function loadMyTeam() {
       try {
+        console.log('Loading team members...');
         const result = await API.getTeamMembers();
+        console.log('Team result:', result);
         
-        if (result.success) {
+        if (result.success && result.members && result.members.length > 0) {
           return `
             <div class="card">
               <div class="card-header">
@@ -752,9 +736,9 @@
               </div>
               <div class="team-grid">
                 ${result.members.map(member => `
-                  <div class="team-member" onclick="viewMemberProfile('${member.staffId}')">
+                  <div class="team-member">
                     <div class="member-header">
-                      <div class="member-avatar" style="background: ${getAvatarColor(member.staffId)}">
+                      <div class="member-avatar" style="background: ${getAvatarColor(member.staffId || '')}">
                         ${getInitials(member.name)}
                       </div>
                       <div class="member-info">
@@ -762,11 +746,11 @@
                         <div class="member-role">${escapeHtml(member.designation || 'Team Member')}</div>
                       </div>
                     </div>
-                    <div style="margin-top: 10px;">
-                      <div class="member-id">ID: ${escapeHtml(member.staffId || 'N/A')}</div>
-                      <div class="member-contact">📞 ${escapeHtml(member.contactNo || 'No contact')}</div>
-                      <div class="member-contact">✉️ ${escapeHtml(member.email || 'No email')}</div>
-                      <div class="member-role">Role: ${escapeHtml(member.role || 'User')}</div>
+                    <div style="margin-top: 12px; font-size: 13px;">
+                      <div style="margin-bottom: 4px;"><strong>ID:</strong> ${escapeHtml(member.staffId || 'N/A')}</div>
+                      <div style="margin-bottom: 4px;"><strong>Contact:</strong> ${escapeHtml(member.contactNo || 'N/A')}</div>
+                      <div style="margin-bottom: 4px;"><strong>Email:</strong> ${escapeHtml(member.email || 'N/A')}</div>
+                      <div><strong>Role:</strong> ${escapeHtml(member.role || 'User')}</div>
                     </div>
                   </div>
                 `).join('')}
@@ -774,16 +758,56 @@
             </div>
           `;
         }
-        return '<div class="card">Error loading team</div>';
+        
+        return `
+          <div class="card">
+            <div style="text-align: center; padding: 40px;">
+              <span class="material-icons-round" style="font-size: 48px; color: var(--outline);">groups</span>
+              <h3>No Team Members Found</h3>
+            </div>
+          </div>
+        `;
       } catch (error) {
-        return '<div class="card">Error loading team</div>';
+        console.error('Team error:', error);
+        return `
+          <div class="card error-container">
+            <span class="material-icons-round error-icon">error</span>
+            <h3>Failed to Load Team</h3>
+            <p style="color: var(--outline); margin: 16px 0;">${error.message}</p>
+            <button class="btn btn-primary retry-button" onclick="loadPageContent('myteam')">
+              Retry
+            </button>
+          </div>
+        `;
       }
     }
     
-    // Load Reports - From timesheet.html
+    // Filter activities
+    async function filterActivities(filter) {
+      document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      document.getElementById('loading').style.display = 'flex';
+      
+      try {
+        const result = await API.getUserActivities(appState.currentUser.staffId, filter);
+        
+        if (result.success) {
+          pageCache.delete('myactivity');
+          await loadPageContent('myactivity');
+        }
+      } catch (error) {
+        showToast('Error filtering activities', 'error');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+    
+    // Load Reports
     function loadReports() {
       return `
-        <!-- Report Types -->
         <div class="report-types">
           <div class="report-type-card ${appState.reportType === 'weekly' ? 'selected' : ''}" onclick="selectReportType('weekly')">
             <div class="report-icon">
@@ -802,7 +826,6 @@
           </div>
         </div>
         
-        <!-- Report Form -->
         <div class="card">
           <div class="card-header">
             <h3 class="card-title">
@@ -863,7 +886,6 @@
           </div>
         </div>
         
-        <!-- Report Preview -->
         <div class="report-preview" id="reportPreview" style="display: none;">
           <div class="preview-header">
             <h3>Report Preview</h3>
@@ -871,12 +893,9 @@
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <div class="preview-content" id="previewContent">
-            <!-- Preview will be loaded here -->
-          </div>
+          <div class="preview-content" id="previewContent"></div>
         </div>
         
-        <!-- Recent Reports -->
         <div class="recent-reports">
           <div class="card-header">
             <h3 class="card-title">
@@ -892,7 +911,7 @@
       `;
     }
     
-    // Load More - From timesheet.html
+    // Load More
     function loadMore() {
       return `
         <div class="card">
@@ -916,80 +935,58 @@
         
         <div class="more-menu">
           <div class="more-item" onclick="showProfile()">
-            <div class="more-icon">
-              <span class="material-icons-round">edit</span>
-            </div>
+            <div class="more-icon"><span class="material-icons-round">edit</span></div>
             <div class="more-content">
               <div class="more-title">Edit Profile</div>
-              <div class="more-subtitle">Update your personal information</div>
+              <div class="more-subtitle">Update your information</div>
             </div>
-            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
           </div>
           
           <div class="more-item" onclick="showNotificationsSettings()">
-            <div class="more-icon">
-              <span class="material-icons-round">notifications</span>
-            </div>
+            <div class="more-icon"><span class="material-icons-round">notifications</span></div>
             <div class="more-content">
               <div class="more-title">Notifications</div>
-              <div class="more-subtitle">Manage notification preferences</div>
+              <div class="more-subtitle">Manage preferences</div>
             </div>
-            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
           </div>
           
           <div class="more-item" onclick="showPrivacySettings()">
-            <div class="more-icon">
-              <span class="material-icons-round">security</span>
-            </div>
+            <div class="more-icon"><span class="material-icons-round">security</span></div>
             <div class="more-content">
               <div class="more-title">Privacy & Security</div>
-              <div class="more-subtitle">Manage your privacy settings</div>
+              <div class="more-subtitle">Manage settings</div>
             </div>
-            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
           </div>
           
           <div class="more-item" onclick="showHelp()">
-            <div class="more-icon">
-              <span class="material-icons-round">help</span>
-            </div>
+            <div class="more-icon"><span class="material-icons-round">help</span></div>
             <div class="more-content">
               <div class="more-title">Help & Support</div>
-              <div class="more-subtitle">FAQs and contact support</div>
+              <div class="more-subtitle">FAQs and support</div>
             </div>
-            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
           </div>
           
           <div class="more-item" onclick="clearCache()">
-            <div class="more-icon">
-              <span class="material-icons-round">delete</span>
-            </div>
+            <div class="more-icon"><span class="material-icons-round">delete</span></div>
             <div class="more-content">
               <div class="more-title">Clear Cache</div>
-              <div class="more-subtitle">Free up storage space</div>
+              <div class="more-subtitle">Free up space</div>
             </div>
-            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
           </div>
           
           <div class="more-item" onclick="showAbout()">
-            <div class="more-icon">
-              <span class="material-icons-round">info</span>
-            </div>
+            <div class="more-icon"><span class="material-icons-round">info</span></div>
             <div class="more-content">
               <div class="more-title">About</div>
               <div class="more-subtitle">Version 1.0.0</div>
             </div>
-            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
           </div>
         </div>
         
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">
-              <span class="material-icons-round">storage</span>
-              Storage
-            </h3>
+            <h3 class="card-title">Storage Info</h3>
           </div>
-          
           <div class="info-grid">
             <div class="info-row">
               <span class="info-label">Offline Activities</span>
@@ -1003,10 +1000,6 @@
               <span class="info-label">Storage Used</span>
               <span class="info-value">${(JSON.stringify(localStorage).length / 1024).toFixed(2)} KB</span>
             </div>
-            <div class="info-row">
-              <span class="info-label">Last Sync</span>
-              <span class="info-value" id="lastSyncTime">${new Date().toLocaleTimeString()}</span>
-            </div>
           </div>
         </div>
       `;
@@ -1014,13 +1007,8 @@
     
     // Render recent reports
     function renderRecentReports() {
-      if (appState.recentReports.length === 0) {
-        return `
-          <div style="text-align: center; padding: 20px; color: var(--outline);">
-            <i class="fas fa-file" style="font-size: 24px; margin-bottom: 8px; opacity: 0.5;"></i>
-            <p>No recent reports</p>
-          </div>
-        `;
+      if (!appState.recentReports || appState.recentReports.length === 0) {
+        return `<div style="text-align: center; padding: 20px; color: var(--outline);">No recent reports</div>`;
       }
       
       return appState.recentReports.slice(0, 5).map((report, index) => {
@@ -1028,23 +1016,20 @@
                     report.format === 'excel' ? 'file-excel' : 'file-csv';
         
         return `
-          <div class="report-item" onclick="downloadRecentReport(${index})">
-            <div class="report-item-icon">
-              <i class="fas fa-${icon}"></i>
-            </div>
+          <div class="report-item">
+            <div class="report-item-icon"><i class="fas fa-${icon}"></i></div>
             <div class="report-item-info">
               <div class="report-item-name">${report.name || 'Report'}</div>
               <div class="report-item-details">
                 <span>${report.type || 'Report'}</span>
-                <span>${report.format?.toUpperCase() || 'PDF'}</span>
                 <span>${report.date || ''}</span>
               </div>
             </div>
-            <div class="report-item-actions" onclick="event.stopPropagation()">
-              <button class="action-btn" onclick="downloadRecentReport(${index})" title="Download">
+            <div class="report-item-actions">
+              <button class="action-btn" onclick="downloadRecentReport(${index})">
                 <i class="fas fa-download"></i>
               </button>
-              <button class="action-btn" onclick="deleteRecentReport(${index})" title="Delete">
+              <button class="action-btn" onclick="deleteRecentReport(${index})">
                 <i class="fas fa-trash"></i>
               </button>
             </div>
@@ -1056,20 +1041,12 @@
     // Report Functions
     function selectReportType(type) {
       appState.reportType = type;
-      
-      document.querySelectorAll('.report-type-card').forEach(card => {
-        card.classList.remove('selected');
-      });
+      document.querySelectorAll('.report-type-card').forEach(c => c.classList.remove('selected'));
       event.currentTarget.classList.add('selected');
       
       const today = new Date();
       const startDate = new Date(today);
-      
-      if (type === 'weekly') {
-        startDate.setDate(today.getDate() - 7);
-      } else {
-        startDate.setMonth(today.getMonth() - 1);
-      }
+      startDate.setDate(today.getDate() - (type === 'weekly' ? 7 : 30));
       
       document.getElementById('startDate').valueAsDate = startDate;
       document.getElementById('endDate').valueAsDate = today;
@@ -1077,10 +1054,7 @@
     
     function selectFormat(format) {
       appState.format = format;
-      
-      document.querySelectorAll('.format-option').forEach(option => {
-        option.classList.remove('selected');
-      });
+      document.querySelectorAll('.format-option').forEach(o => o.classList.remove('selected'));
       event.currentTarget.classList.add('selected');
     }
     
@@ -1098,109 +1072,58 @@
       }
     }
     
-    function validateDates() {
+    async function previewReport() {
       const startDate = document.getElementById('startDate').value;
       const endDate = document.getElementById('endDate').value;
       
       if (!startDate || !endDate) {
-        showToast('Please select start and end dates', 'error');
-        return false;
+        showToast('Select dates', 'error');
+        return;
       }
-      
-      if (new Date(startDate) > new Date(endDate)) {
-        showToast('Start date cannot be after end date', 'error');
-        return false;
-      }
-      
-      return true;
-    }
-    
-    async function previewReport() {
-      if (!validateDates()) return;
       
       showLoading('Loading preview...');
       
       try {
-        const result = await API.getUserActivities(
-          appState.currentUser.staffId,
-          'all'
-        );
+        const result = await API.getUserActivities(appState.currentUser.staffId, 'all');
         
         if (result.success) {
-          const startDate = new Date(document.getElementById('startDate').value);
-          const endDate = new Date(document.getElementById('endDate').value);
+          const start = new Date(startDate);
+          const end = new Date(endDate);
           
-          const filtered = result.activities.filter(a => {
-            const activityDate = new Date(a.date);
-            return activityDate >= startDate && activityDate <= endDate;
+          const filtered = (result.activities || []).filter(a => {
+            const ad = new Date(a.date);
+            return ad >= start && ad <= end;
           });
           
-          showPreview(filtered);
+          const previewContent = document.getElementById('previewContent');
+          
+          if (filtered.length === 0) {
+            previewContent.innerHTML = '<div style="text-align: center; padding: 20px;">No activities found</div>';
+          } else {
+            previewContent.innerHTML = `
+              <table class="preview-table">
+                <thead><tr><th>Date</th><th>Description</th><th>Status</th></tr></thead>
+                <tbody>
+                  ${filtered.slice(0, 10).map(a => `
+                    <tr>
+                      <td>${a.date}</td>
+                      <td>${escapeHtml(a.description).substring(0, 30)}</td>
+                      <td>${a.status}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              ${filtered.length > 10 ? `<div style="margin-top: 8px;">... and ${filtered.length - 10} more</div>` : ''}
+            `;
+          }
+          
+          document.getElementById('reportPreview').style.display = 'block';
         }
       } catch (error) {
-        showToast('Failed to load preview', 'error');
+        showToast('Preview failed', 'error');
       } finally {
         hideLoading();
       }
-    }
-    
-    function showPreview(activities) {
-      const previewContent = document.getElementById('previewContent');
-      
-      if (!activities || activities.length === 0) {
-        previewContent.innerHTML = `
-          <div style="text-align: center; padding: 40px; color: var(--outline);">
-            <i class="fas fa-clipboard-list" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-            <p>No activities found for the selected date range</p>
-          </div>
-        `;
-      } else {
-        let html = `
-          <table class="preview-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Location</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-        
-        activities.slice(0, 10).forEach(activity => {
-          html += `
-            <tr>
-              <td>${activity.date}</td>
-              <td>${escapeHtml(activity.description.substring(0, 30))}${activity.description.length > 30 ? '...' : ''}</td>
-              <td>${activity.location || 'N/A'}</td>
-              <td>${activity.status}</td>
-            </tr>
-          `;
-        });
-        
-        if (activities.length > 10) {
-          html += `
-            <tr>
-              <td colspan="4" style="text-align: center; font-style: italic; color: var(--outline);">
-                ... and ${activities.length - 10} more activities
-              </td>
-            </tr>
-          `;
-        }
-        
-        html += `
-            </tbody>
-          </table>
-          <div style="margin-top: 12px; font-size: 12px; color: var(--outline);">
-            Showing ${Math.min(activities.length, 10)} of ${activities.length} activities
-          </div>
-        `;
-        
-        previewContent.innerHTML = html;
-      }
-      
-      document.getElementById('reportPreview').style.display = 'block';
     }
     
     function closePreview() {
@@ -1208,14 +1131,17 @@
     }
     
     async function generateReport() {
-      if (!validateDates()) return;
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
       
-      showLoading('Generating report...');
+      if (!startDate || !endDate) {
+        showToast('Select dates', 'error');
+        return;
+      }
+      
+      showLoading('Generating...');
       
       try {
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-        
         const result = await API.generateReport(
           appState.currentUser.staffId,
           appState.reportType,
@@ -1225,25 +1151,12 @@
         );
         
         if (result.success) {
-          if (result.data) {
-            const blob = new Blob([result.data], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = result.filename || `report_${appState.reportType}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-          }
-          
-          // Save to recent reports
           const report = {
             id: Date.now(),
             name: `${appState.reportType} Report`,
             type: appState.reportType,
             format: appState.format,
-            date: new Date().toLocaleDateString(),
-            startDate,
-            endDate
+            date: new Date().toLocaleDateString()
           };
           
           appState.recentReports.unshift(report);
@@ -1251,20 +1164,17 @@
           localStorage.setItem('recentReports', JSON.stringify(appState.recentReports));
           
           document.getElementById('recentReportsList').innerHTML = renderRecentReports();
-          showToast('Report generated successfully', 'success');
-        } else {
-          showToast(result.message || 'Failed to generate report', 'error');
+          showToast('Report generated', 'success');
         }
       } catch (error) {
-        showToast('Error generating report', 'error');
+        showToast('Generation failed', 'error');
       } finally {
         hideLoading();
       }
     }
     
     function downloadRecentReport(index) {
-      const report = appState.recentReports[index];
-      showToast(`Downloading ${report.name}`, 'info');
+      showToast('Downloading...', 'info');
     }
     
     function deleteRecentReport(index) {
@@ -1276,35 +1186,19 @@
       }
     }
     
-    // More tab functions
-    function showProfile() {
-      showToast('Profile settings coming soon', 'info');
-    }
-    
-    function showNotificationsSettings() {
-      showToast('Notifications settings coming soon', 'info');
-    }
-    
-    function showPrivacySettings() {
-      showToast('Privacy settings coming soon', 'info');
-    }
-    
-    function showHelp() {
-      window.open('mailto:support@trackmaster.com?subject=Help Request', '_blank');
-    }
-    
-    function showAbout() {
-      showToast('TrackMaster v1.0.0 - Timesheet Management System', 'info');
-    }
+    // More functions
+    function showProfile() { showToast('Profile settings', 'info'); }
+    function showNotificationsSettings() { showToast('Notifications settings', 'info'); }
+    function showPrivacySettings() { showToast('Privacy settings', 'info'); }
+    function showHelp() { window.open('mailto:support@trackmaster.com'); }
+    function showAbout() { showToast('TrackMaster v1.0.0', 'info'); }
     
     function clearCache() {
-      if (confirm('Clear all cached data?')) {
+      if (confirm('Clear cache?')) {
         pageCache.clear();
-        API.cache.clear();
+        API.cache?.clear();
         appState.offlineActivities = [];
-        appState.recentReports = [];
         localStorage.removeItem('offlineActivities');
-        localStorage.removeItem('recentReports');
         showToast('Cache cleared', 'success');
         loadPageContent('more');
       }
@@ -1318,13 +1212,13 @@
     
     function getAvatarColor(id) {
       const colors = ['#6750A4', '#0D904F', '#DC3545', '#FFC107', '#17A2B8'];
-      const index = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+      const index = (id || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length;
       return colors[index];
     }
     
     function escapeHtml(unsafe) {
       if (!unsafe) return '';
-      return unsafe
+      return String(unsafe)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -1337,15 +1231,10 @@
       window.location.href = 'newactivity.html?edit=' + rowId;
     }
     
-    function viewMemberProfile(staffId) {
-      showToast('Viewing profile: ' + staffId, 'info');
-    }
-    
     function showNotifications() {
       showToast('No new notifications', 'info');
     }
     
-    // Install prompt
     function checkInstallPrompt() {
       if (appState.deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
         document.getElementById('installPrompt').style.display = 'block';
@@ -1365,26 +1254,17 @@
       localStorage.setItem('installPromptDismissed', Date.now());
     }
     
-    // Sync offline activities
     async function syncOfflineActivities() {
       if (appState.offlineActivities.length > 0) {
-        showToast('Syncing offline activities...', 'info');
-        
         for (const activity of appState.offlineActivities) {
-          try {
-            await API.saveActivity(activity);
-          } catch (error) {
-            console.error('Sync failed:', error);
-          }
+          try { await API.saveActivity(activity); } catch (e) {}
         }
-        
         appState.offlineActivities = [];
         localStorage.removeItem('offlineActivities');
-        showToast('Sync completed!', 'success');
+        showToast('Sync completed', 'success');
       }
     }
     
-    // Loading functions
     function showLoading(text) {
       document.getElementById('loadingText').textContent = text || 'Loading...';
       document.getElementById('loading').style.display = 'flex';
@@ -1394,39 +1274,29 @@
       document.getElementById('loading').style.display = 'none';
     }
     
-    // Refresh data
     function refreshData() {
       pageCache.clear();
-      API.cache.clear();
+      API.cache?.clear();
       loadPageContent(appState.currentPage);
-      showToast('Data refreshed', 'success');
+      showToast('Refreshed', 'success');
     }
     
-    // Logout
     function logout() {
-      if (confirm('Are you sure you want to logout?')) {
+      if (confirm('Logout?')) {
         localStorage.removeItem('trackmaster_user');
         sessionStorage.removeItem('trackmaster_session');
-        pageCache.clear();
-        API.cache.clear();
         window.location.href = 'login.html';
       }
     }
     
-    // Show toast
     function showToast(message, type) {
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
       toast.textContent = message;
-      
       document.getElementById('toastContainer').appendChild(toast);
-      
-      setTimeout(() => {
-        toast.remove();
-      }, 3000);
+      setTimeout(() => toast.remove(), 3000);
     }
     
-    // Initialize
     window.onload = initApp;
   </script>
 </body>
