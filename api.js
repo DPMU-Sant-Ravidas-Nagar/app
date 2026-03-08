@@ -1,7 +1,7 @@
 // api.js - Google Sheets API wrapper using JSONP (bypasses CORS)
 const API = {
   // Replace with your Google Apps Script deployment URL
-  baseUrl: 'https://script.google.com/macros/s/AKfycby9mZGt2G9CI9HZqel8YTmExiR2HWqDb2iEk7McgYYp5Iz2eWXkrcZFhNAPdu9HQtHE/exec',
+  baseUrl: 'https://script.google.com/macros/s/AKfycbwipm9x7hgC31sRiBNPueBxBuO9ulgfXXibiYdnK7rBg8178VbZoj-s5PkW6BNvyM1-sA/exec',
   
   // Generate unique callback name
   generateCallback() {
